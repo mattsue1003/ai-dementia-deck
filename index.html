@@ -186,6 +186,7 @@ dl.kit dd{margin:0}
 .steps-grid.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .steps-grid.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
 .steps-grid.g4 .step img{aspect-ratio:2/1}
+.howto .cp p{font-size:.82rem;max-height:7.5em;overflow:auto}
 .step{margin:0;display:flex;flex-direction:column;gap:8px;min-width:0}
 .step img{width:100%;max-width:100%;aspect-ratio:16/10;object-fit:contain;background:var(--soft);border:1px solid var(--line);display:block}
 .step figcaption{display:grid;grid-template-columns:2.4em minmax(0,1fr);font-size:clamp(.9rem,1.1vw,1rem);line-height:1.5}
@@ -223,6 +224,13 @@ dl.kit dd{margin:0}
 .song-side{display:flex;flex-direction:column;gap:18px;min-width:0}
 .lead-s{font-size:clamp(1.05rem,1.6vw,1.35rem);line-height:1.7;margin:0}
 @media (max-width:720px){.song{grid-template-columns:minmax(0,1fr)}.song video{height:auto;width:100%}}
+.cp{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:start;background:var(--soft);border-left:3px solid var(--fg);padding:8px 12px;margin-top:4px}
+.cp span{grid-column:1 / -1;font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;color:var(--muted)}
+.cp p{margin:0;font-size:.9rem;line-height:1.6;min-width:0;overflow-wrap:anywhere}
+.cp button{font-size:.8rem;white-space:nowrap;padding:2px 0}
+.howto .step figcaption{font-size:clamp(.95rem,1.15vw,1.05rem)}
+.howto .step figcaption b{color:var(--fg)}
+.howto .step figcaption span b{font-family:var(--sans);font-weight:700;font-size:inherit;color:var(--fg);padding:0}
 .ctrl{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;font-family:var(--mono);font-size:.875rem}
 .answer{font-size:clamp(1.2rem,2vw,1.6rem);font-weight:500;min-height:1.6em}
 .book{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:clamp(20px,4vw,52px);align-items:center}
@@ -678,16 +686,36 @@ ${demoHead('04','讓 AI 變成「阿秀姐」電台主持人','Gemini App 角色
   </div>
 </div>`);
 
-add('實作 04 Google AI Studio','demo',['teal','ring','sky','radio'],`
-${demoHead('04','建議做法：在 Google AI Studio 固定角色，再變成聲音','Google AI Studio・約 3 分鐘')}
-<div class="steps-grid">
-  ${step('01','c4-s1','右側「System instructions」新增一則「阿秀姐電台」，貼上角色設定；之後每次開新對話都能直接選')}
-  ${step('02','c4-s2','只要說「今天是 11 月 26 日，現在請開場」，阿秀姐就報日期、節氣，請大家看日曆')}
-  ${step('03','c4-s3','把長輩的 call in 打進去，阿秀姐會問住哪裡，再追問「第一次聽到〈望春風〉是在哪裡」')}
-  ${step('04','c4-s4','要讓阿秀姐開口：模型選「Audio」裡的 TTS，進到「Turn text into natural-sounding speech」')}
-  ${step('05','c4-s5','聲音選溫暖的女聲，Style 寫「1960 年代收音機女主持人、台灣口音、語速放慢」，貼上台詞按 Run')}
-  ${note('實作心得','角色設定放在 System instructions，比每次貼提示詞穩定，阿秀姐不會講到一半變回一般 AI。我們用的帳號跑到第 05 步時，跳出「Quota limit reached」，免費額度用完了；正式上課前先試跑，把聲音存好，或改由帶領者自己唸台詞。')}
+const cp=(id,label,text)=>`<div class="cp"><span>${label}</span><p id="${id}">${text}</p><button class="br mono" data-act="copy" data-src="${id}">複製</button></div>`;
+const stepx=(n,img,cap,extra='')=>`<figure class="step"><img src="howto/${img}.jpg" alt="步驟 ${n}：${cap.replace(/<[^>]+>/g,'')}" loading="lazy"><figcaption><b>${n}</b><span>${cap}</span></figcaption>${extra}</figure>`;
+
+add('實作 04-A AI Studio 設定角色','demo',['teal','ring','sky','radio'],`
+${demoHead('04-A','Google AI Studio：先把阿秀姐設定好','第 1 段 共 3 段・文字對話・紅框是要按的地方')}
+<div class="steps-grid g4 howto">
+  ${stepx('01','as-1','打開 <b>aistudio.google.com</b>，登入 Google 帳號。右邊「Run settings」裡，點 <b>System instructions</b> 那一格。')}
+  ${stepx('02','as-2','右邊會滑出設定框：① <b>Title</b> 貼上名稱　② 下面大框貼上角色設定　③ 按右上 <b>×</b> 關閉，會自動存起來。',cp('asT','① 名稱','阿秀姐電台')+cp('asI','② 角色設定',`請你扮演 1960 年代台灣廣播電台的主持人「阿秀姐」，主持給長輩聽的點歌節目。規則：1. 先報今天的日期、季節和節氣，請聽眾一起確認。2. 每次只說 3 到 4 句，用簡單國語夾一點台語。3. 聽眾 call in 時，先問他叫什麼、住哪裡，再追問一個當年的細節。4. 語氣溫暖、放慢，不要用英文和表情符號。`))}
+  ${stepx('03','as-3','① 點下方輸入框，貼上開場句（日期改成上課當天）　② 按右下 <b>Run</b>（或按 ⌘＋Enter）。阿秀姐就會報日期、節氣。',cp('asO','開場句','今天是 2026 年 11 月 26 日，現在請開場。'))}
+  ${stepx('04','as-4','長輩想點歌時，把他說的話打進同一個輸入框，再按 <b>Run</b>。阿秀姐會問住哪裡，再追問當年的事。',cp('asC','call in 範例','（聽眾 call in）阿秀姐你好，我是清水伯，住雲林北港，我想要點一首〈望春風〉。'))}
 </div>`);
+
+add('實作 04-B AI Studio 選聲音','demo',['teal','ring','sky','radio'],`
+${demoHead('04-B','讓阿秀姐開口說話：換成文字轉語音','第 2 段 共 3 段・文字轉語音・紅框是要按的地方')}
+<div class="steps-grid g4 howto">
+  ${stepx('05','at-1','先點左側 <b>Playground</b> 開一頁新的（在舊對話換模型，角色設定會被清掉）。再點右上「Run settings」最上面的<b>模型名稱</b>那一格。')}
+  ${stepx('06','at-2','跳出「Model selection」：① 上排點 <b>Audio</b>　② 點 <b>Gemini 3.8 Flash TTS</b>（TTS＝文字轉語音）。')}
+  ${stepx('07','at-3','畫面變成「Turn text into natural-sounding speech」，點左邊 <b>Create new dialog</b>。')}
+  ${stepx('08','at-4','出現一個台詞框。點左上 <b>Speaker 1 - Fola</b>，換成適合阿秀姐的聲音。')}
+</div>`);
+
+add('實作 04-C AI Studio 產生聲音','demo',['teal','ring','sky','radio'],`
+${demoHead('04-C','選聲音、寫風格、貼台詞，按 Run','第 3 段 共 3 段・文字轉語音・紅框是要按的地方')}
+<div class="steps-grid g4 howto">
+  ${stepx('09','at-5','① <b>Gender</b> 選 <b>Feminine</b>（女聲）　② 點 <b>Cleo</b>（Warm and engaging，溫暖女聲），再按右上 <b>×</b> 關閉。按每個聲音右邊的 ▶ 可以先試聽。')}
+  ${stepx('10','at-6','① 點 <b>Style</b>　② 在「Describe the voice style」框貼上說話風格，按 Enter。',cp('asS','說話風格','1960 年代台灣收音機裡的中年女主持人，台灣口音，溫暖親切，語速放慢，帶笑意'))}
+  ${stepx('11','at-7','① 點下面的台詞框，貼上阿秀姐要說的話（也可以複製第 03 步 AI 回答的那段）　② 按右下 <b>Run</b>。',cp('asP','台詞範例',`各位收音機前面的長輩朋友大家好，我是阿秀姐，咱今天慢慢來聽歌聊天。今天是 11 月 26 日星期四，已經是冬天，節氣也來到小雪了，大家一起看桌上的日曆確認看看，是不是沒錯呀？這幾天早晚風比較冷，大家要記得穿燒暖，倒一杯熱茶慢慢喝喔。現在點歌時間正式開始了，歡迎大家打電話進來，跟阿秀姐點歌講古。`))}
+  ${stepx('12','at-8','如果跳出 <b>Quota limit reached</b>，代表這個帳號今天的免費額度用完了：按右上 <b>×</b> 關掉。不要按升級或付費，改天再試，或由帶領者照台詞自己唸。')}
+</div>
+<div class="tip"><span>實作心得</span><p>我們示範時在第 12 步碰到額度上限，這次沒拿到聲音檔。正式上課前一兩天先跑一次，成功就把聲音存起來，上課直接播。角色設定放在 System instructions，阿秀姐比較不會講到一半變回一般 AI。</p></div>`);
 
 add('案例 05 生命故事繪本','case',['sky','sun','yellow','book'],caseSlide('05','我的生命故事繪本',['sky','sun','yellow','book'],
  ['綜合','6–8 週','個人作品','相印機或影印'],
@@ -1001,7 +1029,7 @@ deck.addEventListener('touchend',e=>{if(tx===null)return;const dx=e.changedTouch
 /* ---------- zoom / spotlight ---------- */
 const zoomEl=document.getElementById('zoom'), zc=document.getElementById('zc'), selBtn=document.getElementById('selbtn');
 const ZSEL='img,.art,.quote,h1,h2,h3,.lead,.lyrics>div,.prompt,.tip,.compare>div,li,td,th,dt,dd,.chip,figcaption,.answer,p,.body';
-const NOZOOM='button,a,input,label,select,textarea,video,.cells,.thumbs,.catgrid,.libbar';
+const NOZOOM='button,a,input,label,select,textarea,video,.cp,.cells,.thumbs,.catgrid,.libbar';
 function openZoom(node){zc.innerHTML='';zc.appendChild(node);zoomEl.hidden=false;selBtn.hidden=true}
 function closeZoom(){zoomEl.hidden=true;zc.innerHTML=''}
 function zoomText(text,isSel){const d=document.createElement('div');d.className='ztext'+(isSel?' sel':'');
