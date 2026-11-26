@@ -1,0 +1,1015 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>AI 媒介翻轉失智據點</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* Layout: archive-wall deck. Quiet off-white ground, small monospace chrome in [ brackets ],
+   numbered square illustrated tiles as the only color; three views: 簡報 / 卡片牆 / 目錄. */
+:root{
+  --bg:#FAFAFA; --fg:#171717; --muted:#6B6B6B; --line:#E2E2E2; --soft:#F0F0EE; --hi:#171717; --hi-fg:#FAFAFA; --veil:rgba(250,250,250,.95);
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  /* tile palette (fixed in both themes, it is the artwork) */
+  --red:#E8412C; --pink:#F3A6B8; --teal:#1E9E86; --cobalt:#3C3FD8; --yellow:#F4C531;
+  --sky:#9FD0E6; --orange:#F07A2A; --green:#2F7D4F; --lilac:#B9A6E8; --sand:#E9DCC4;
+  --head:56px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#141414;--fg:#ECECEA;--muted:#9A9A98;--line:#2C2C2C;--soft:#1F1F1F;--hi:#ECECEA;--hi-fg:#141414;--veil:rgba(20,20,20,.95);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141414;--fg:#ECECEA;--muted:#9A9A98;--line:#2C2C2C;--soft:#1F1F1F;--hi:#ECECEA;--hi-fg:#141414;--veil:rgba(20,20,20,.95);color-scheme:dark}
+
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:16px;line-height:1.6;overflow:hidden;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
+.mono{font-family:var(--mono);font-size:.8125rem;letter-spacing:.04em}
+.br::before{content:"[ ";color:var(--muted)} .br::after{content:" ]";color:var(--muted)}
+
+/* chrome */
+header{position:fixed;top:0;left:0;right:0;z-index:20;height:calc(var(--head) + env(safe-area-inset-top,0px));
+  padding:env(safe-area-inset-top,0px) max(24px,env(safe-area-inset-right,0px)) 0 max(24px,env(safe-area-inset-left,0px));
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;background:var(--bg);font-family:var(--mono);font-size:.875rem;text-transform:uppercase}
+header .brand{letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header nav{display:flex;gap:20px}
+header nav button{letter-spacing:.06em}
+header nav button[aria-pressed="true"] span{text-decoration:underline;text-underline-offset:4px}
+header .about{justify-self:end;letter-spacing:.06em}
+footer{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:space-between;align-items:center;
+  padding:0 max(24px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-left,0px));
+  font-family:var(--mono);font-size:.875rem;pointer-events:none}
+footer>*{pointer-events:auto}
+footer .pager{display:flex;gap:14px}
+.count{font-variant-numeric:tabular-nums}
+.count u{text-underline-offset:4px}
+.count i{font-style:normal;color:var(--muted);margin:0 6px}
+
+/* views */
+.view{position:fixed;inset:calc(var(--head) + env(safe-area-inset-top,0px)) 0 0 0}
+#deck .slide{position:absolute;inset:0;overflow-y:auto;padding:clamp(16px,4vh,48px) max(24px,env(safe-area-inset-right,0px)) 88px max(24px,env(safe-area-inset-left,0px));
+  display:flex;flex-direction:column;opacity:0;visibility:hidden;transition:opacity .45s ease,visibility 0s .45s}
+#deck .slide.on{opacity:1;visibility:visible;transition:opacity .45s ease}
+.inner{margin:auto;width:100%;max-width:1180px;display:flex;flex-direction:column;gap:clamp(20px,3.2vh,36px)}
+.eyebrow{font-family:var(--mono);font-size:.8125rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:flex;gap:18px}
+.eyebrow b{font-weight:500;color:var(--fg)}
+h1,h2,h3{margin:0;font-weight:500;text-wrap:balance;letter-spacing:.01em}
+h1{font-size:clamp(2.1rem,5.2vw,4.4rem);line-height:1.2;font-weight:700}
+h2{font-size:clamp(1.6rem,3.3vw,2.8rem);line-height:1.3}
+h3{font-size:clamp(1.05rem,1.5vw,1.3rem);line-height:1.4}
+p{margin:0}
+.lead{font-size:clamp(1.05rem,1.6vw,1.35rem);max-width:40em;color:var(--fg)}
+.body{font-size:clamp(.98rem,1.25vw,1.12rem)}
+.muted{color:var(--muted)}
+
+/* tiles */
+.tile{display:flex;flex-direction:column;gap:8px;min-width:0}
+.tile .cap{font-family:var(--mono);font-size:.75rem;letter-spacing:.04em;display:flex;gap:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .cap span:first-child{color:var(--muted)}
+.art{aspect-ratio:1;width:100%;max-width:100%;display:block}
+.art svg{display:block;width:100%;height:100%}
+
+/* cover */
+.cover{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(24px,5vw,72px);align-items:center}
+.collage{display:grid;grid-template-columns:repeat(3,1fr);gap:18px 22px}
+.collage .tile:nth-child(3n+2){margin-top:44px}
+.collage .tile:nth-child(3n+3){margin-top:-22px}
+
+/* stagger grid for problems / media */
+.stagger{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:28px 28px;align-items:start}
+.stagger .tile:nth-child(even){margin-top:56px}
+.stagger .tile p{font-size:.95rem;line-height:1.55}
+.stagger .tile h3{margin-top:6px}
+
+/* compare */
+.compare{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);border-top:1px solid var(--fg)}
+.compare>div{padding:16px 0;border-bottom:1px solid var(--line);font-size:clamp(1rem,1.4vw,1.2rem);min-width:0}
+.compare .arrow{padding:16px 24px;font-family:var(--mono);color:var(--muted)}
+.compare .hd{font-family:var(--mono);font-size:.8125rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-bottom:1px solid var(--fg)}
+.compare .new{font-weight:500}
+
+/* quote */
+.quote{font-size:clamp(1.8rem,4.4vw,3.8rem);line-height:1.35;font-weight:500;max-width:18em;text-wrap:balance}
+.quote mark{background:var(--yellow);color:#171717;padding:0 .12em}
+
+/* matrix */
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:clamp(.95rem,1.2vw,1.08rem)}
+th{font-family:var(--mono);font-weight:400;font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 16px 10px 0;border-bottom:1px solid var(--fg)}
+td{padding:14px 16px 14px 0;border-bottom:1px solid var(--line);vertical-align:top}
+td:first-child{font-weight:500;white-space:nowrap}
+.dot{display:inline-block;width:10px;height:10px;margin-right:10px;vertical-align:1px}
+
+/* case */
+.case{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(24px,4.5vw,64px);align-items:start}
+.case .art{max-width:420px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;font-family:var(--mono);font-size:.8125rem;color:var(--muted)}
+ol.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border-top:1px solid var(--fg)}
+ol.steps li{display:grid;grid-template-columns:3.2em 1fr;padding:11px 0;border-bottom:1px solid var(--line);font-size:clamp(.98rem,1.25vw,1.1rem)}
+ol.steps li::before{content:attr(data-n);font-family:var(--mono);font-size:.8125rem;color:var(--muted);padding-top:3px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--mono);font-size:.75rem;letter-spacing:.04em;padding:4px 10px;border:1px solid var(--fg)}
+.tip{display:grid;grid-template-columns:auto 1fr;gap:14px;font-size:clamp(.95rem,1.2vw,1.05rem);padding:14px 16px;background:var(--soft)}
+.tip span{font-family:var(--mono);font-size:.75rem;letter-spacing:.06em;padding-top:3px;white-space:nowrap}
+
+/* story wall */
+.wall-mini{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:18px 24px}
+.wall-mini .tile:nth-child(even){margin-top:40px}
+
+/* timeline */
+.tl{display:flex;width:100%;border-top:1px solid var(--fg)}
+.tl>div{min-width:0;padding:14px 14px 0 0;display:flex;flex-direction:column;gap:10px}
+.tl .bar{height:clamp(56px,10vh,96px)}
+.tl .t{font-family:var(--mono);font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.tl h3{font-size:clamp(1rem,1.35vw,1.2rem)}
+.tl p{font-size:.92rem;line-height:1.55;color:var(--muted)}
+
+/* toolbox */
+.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(20px,4vw,56px)}
+dl.kit{margin:0;border-top:1px solid var(--fg)}
+dl.kit>div{display:grid;grid-template-columns:7em 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+dl.kit dt{font-family:var(--mono);font-size:.8125rem;color:var(--muted);padding-top:2px}
+dl.kit dd{margin:0}
+.prompt{font-family:var(--mono);font-size:.875rem;line-height:1.75;padding:18px 20px;border:1px solid var(--fg);position:relative}
+.prompt .lbl{position:absolute;top:-.8em;left:14px;background:var(--bg);padding:0 8px;font-size:.75rem;color:var(--muted)}
+.prompt em{font-style:normal;background:var(--soft);padding:0 .25em}
+.copy{margin-top:12px}
+
+/* numbered list (ethics, next) */
+.rows{border-top:1px solid var(--fg)}
+.rows>div{display:grid;grid-template-columns:3.2em minmax(0,13em) 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.rows .n{font-family:var(--mono);font-size:.8125rem;color:var(--muted)}
+.rows h3{font-size:clamp(1.05rem,1.5vw,1.3rem)}
+.rows p{font-size:clamp(.95rem,1.2vw,1.05rem)}
+
+/* observation sheet */
+.sheet table{min-width:560px}
+.sheet td{font-family:var(--mono);font-size:.85rem;font-variant-numeric:tabular-nums}
+.sheet td:first-child{font-family:var(--sans);font-size:.95rem}
+
+/* wall view */
+#wall{overflow-y:auto;padding:24px max(24px,env(safe-area-inset-right,0px)) 120px max(24px,env(safe-area-inset-left,0px))}
+.wallgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:40px 56px;max-width:1500px;margin:0 auto}
+.wallgrid button{text-align:left}
+.wallgrid .tile:nth-child(even){margin-top:72px}
+.wallgrid .art{transition:transform .25s ease}
+.wallgrid button:hover .art{transform:translateY(-4px)}
+/* list view */
+#list{overflow-y:auto;padding:24px max(24px,env(safe-area-inset-right,0px)) 120px max(24px,env(safe-area-inset-left,0px))}
+.listing{max-width:1100px;margin:0 auto;border-top:1px solid var(--fg)}
+.listing button{display:grid;grid-template-columns:3.5em 44px minmax(0,1fr) auto;gap:18px;align-items:center;width:100%;text-align:left;padding:10px 0;border-bottom:1px solid var(--line)}
+.listing button:hover{background:var(--soft)}
+.listing .n{font-family:var(--mono);font-size:.8125rem;color:var(--muted);padding-left:6px}
+.listing .ttl{font-size:1.05rem;min-width:0}
+.listing .kind{font-family:var(--mono);font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding-right:6px}
+
+/* tool library */
+.catgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px 32px;border-top:1px solid var(--fg);padding-top:20px}
+.catgrid button{text-align:left;display:grid;grid-template-columns:clamp(64px,7vw,96px) minmax(0,1fr);gap:16px;align-items:center}
+.catgrid .cap{font-family:var(--mono);font-size:.75rem;letter-spacing:.04em;color:var(--muted)}
+.catgrid h3{font-size:clamp(1.05rem,1.45vw,1.25rem)}
+.catgrid p{font-size:.85rem;color:var(--muted);line-height:1.5}
+.catgrid .art{transition:transform .25s ease}
+.catgrid button:hover .art{transform:translateY(-3px)}
+.catgrid button:hover h3{text-decoration:underline;text-underline-offset:4px}
+
+/* hands-on demo slides */
+.steps-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px 22px}
+.steps-grid.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.step{margin:0;display:flex;flex-direction:column;gap:8px;min-width:0}
+.step img{width:100%;max-width:100%;aspect-ratio:16/10;object-fit:contain;background:var(--soft);border:1px solid var(--line);display:block}
+.step figcaption{display:grid;grid-template-columns:2.4em minmax(0,1fr);font-size:clamp(.9rem,1.1vw,1rem);line-height:1.5}
+.step figcaption b{font-family:var(--mono);font-weight:400;color:var(--muted);font-size:.8rem;padding-top:2px}
+.step.note{background:var(--soft);padding:18px 20px;justify-content:center;gap:10px}
+.step.note span{font-family:var(--mono);font-size:.75rem;letter-spacing:.06em;color:var(--muted)}
+.step.note p{font-size:clamp(.95rem,1.2vw,1.08rem);line-height:1.6}
+.step.note code{font-family:var(--mono);font-size:.85em;background:var(--bg);padding:1px 5px}
+.ba{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:18px;align-items:center}
+.ba figure{margin:0;display:flex;flex-direction:column;gap:8px;min-width:0}
+.ba img{width:100%;max-width:100%;display:block;border:1px solid var(--line)}
+.ba figcaption{font-family:var(--mono);font-size:.8rem;color:var(--muted)}
+.ba .arrow{font-family:var(--mono);font-size:1.4rem;color:var(--muted)}
+.lyrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px}
+.lyrics>div{font-size:clamp(1.15rem,2.1vw,1.7rem);line-height:1.85;border-top:1px solid var(--fg);padding-top:10px;min-width:0}
+.lyrics span{display:block;font-family:var(--mono);font-size:.75rem;color:var(--muted);line-height:2}
+.linkbtn{font-family:var(--mono);font-size:.875rem;color:var(--fg);text-decoration:none;align-self:flex-start}
+.linkbtn:hover{text-decoration:underline;text-underline-offset:4px}
+.reveal{position:relative;aspect-ratio:1376/768;width:100%;max-width:100%;overflow:hidden;border:1px solid var(--fg);background:var(--soft)}
+.reveal img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.reveal .cells{position:absolute;inset:0;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(4,1fr)}
+.reveal .cells button{border:1px solid rgba(255,255,255,.35);transition:opacity .35s ease;font-family:var(--mono);font-size:.8rem;color:rgba(23,23,23,.55)}
+.reveal .cells button.off{opacity:0;pointer-events:none}
+.ctrl{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;font-family:var(--mono);font-size:.875rem}
+.answer{font-size:clamp(1.2rem,2vw,1.6rem);font-weight:500;min-height:1.6em}
+.book{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:clamp(20px,4vw,52px);align-items:center}
+.book .page img{width:100%;max-width:100%;display:block;border:1px solid var(--line)}
+.book .pno{font-family:var(--mono);font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.book .ttl{font-size:clamp(1rem,1.4vw,1.2rem);color:var(--muted)}
+.book .line{font-size:clamp(1.5rem,3vw,2.5rem);line-height:1.5;font-weight:500;text-wrap:balance}
+.thumbs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.thumbs button{opacity:.45;border:2px solid transparent;padding:0}
+.thumbs button[aria-current="true"]{opacity:1;border-color:var(--fg)}
+.thumbs img{width:100%;display:block;aspect-ratio:4/3;object-fit:cover}
+
+/* zoom / spotlight */
+#deck .slide :is(img,.art,h1,h2,h3,.quote,.lead,.body,p,li,td,dt,dd,.chip,.prompt,.tip,.compare>div,.lyrics>div,figcaption),#tools .shot img{cursor:zoom-in}
+#deck .slide :is(button,a) :is(img,.art,h3,p),#deck .slide :is(button,a){cursor:pointer}
+#zoom{position:fixed;inset:0;z-index:60;background:var(--veil);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;cursor:zoom-out;
+  padding:max(24px,env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-left,0px))}
+#zoom .zc{width:100%;max-width:1600px;max-height:calc(100% - 48px);overflow:auto;display:flex;justify-content:center;animation:zin .28s ease}
+#zoom .zc>img{width:100%;height:calc(100vh - 150px);max-height:none;object-fit:contain;border:0;background:none}
+#zoom .ztext{font-size:clamp(1.8rem,5vw,4.6rem);line-height:1.45;font-weight:500;max-width:22em;text-wrap:balance;white-space:pre-line;color:var(--fg)}
+#zoom .ztext.sel{font-weight:700}
+#zoom .ztext.sel span{background:var(--yellow);color:#171717;padding:0 .15em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+#zoom img,#zoom svg{max-width:100%;max-height:calc(100vh - 140px);width:auto;height:auto;display:block;object-fit:contain;border:1px solid var(--line);background:var(--bg)}
+#zoom .zsvg{width:min(78vh,88vw)}
+#zoom .zsvg svg{width:100%;height:auto;max-height:none}
+#zoom table{min-width:0;font-size:clamp(1.2rem,2.6vw,2.1rem)}
+#zoom .zhint{font-family:var(--mono);font-size:.8rem;color:var(--muted)}
+@keyframes zin{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+#selbtn{position:fixed;z-index:55;font-family:var(--mono);font-size:.8rem;letter-spacing:.04em;background:var(--hi);color:var(--hi-fg);padding:7px 12px}
+.tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px 24px}
+.tool{display:flex;flex-direction:column;gap:7px;min-width:0}
+.tool a{display:flex;flex-direction:column;gap:7px;color:inherit;text-decoration:none;min-width:0}
+.shot{aspect-ratio:16/10;max-width:100%;overflow:hidden;border:1px solid var(--line);background:var(--soft)}
+.shot img{width:100%;height:100%;object-fit:cover;object-position:top;display:block;transition:transform .35s ease}
+.tool:hover .shot img{transform:scale(1.04)}
+.tool .cap{font-family:var(--mono);font-size:.75rem;letter-spacing:.04em;display:flex;gap:12px;min-width:0}
+.tool .cap span:first-child{color:var(--muted)}
+.tool .cap b{font-family:var(--sans);font-weight:500;font-size:.98rem;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tool p{font-size:.85rem;line-height:1.5;color:var(--muted)}
+.tool .open{font-family:var(--mono);font-size:.75rem;letter-spacing:.04em}
+.tool a:hover .open{text-decoration:underline;text-underline-offset:3px}
+.cathead{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:baseline}
+.cathead .sw{display:inline-block;width:12px;height:12px;margin-right:8px;vertical-align:0}
+#tools{overflow-y:auto;padding:20px max(24px,env(safe-area-inset-right,0px)) 120px max(24px,env(safe-area-inset-left,0px))}
+.lib{max-width:1300px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+.libbar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;position:sticky;top:-20px;background:var(--bg);padding:12px 0;z-index:2;border-bottom:1px solid var(--fg)}
+.libbar input{font:inherit;font-size:1rem;color:var(--fg);background:var(--bg);border:1px solid var(--fg);padding:8px 12px;width:min(320px,100%);border-radius:0}
+.libbar input::placeholder{color:var(--muted)}
+.chipbtn{font-family:var(--mono);font-size:.78rem;letter-spacing:.04em;padding:6px 10px;border:1px solid var(--line)}
+.chipbtn[aria-pressed="true"]{background:var(--hi);color:var(--hi-fg);border-color:var(--hi)}
+.chipbtn i{font-style:normal;opacity:.6;margin-left:6px}
+.libsec{display:flex;flex-direction:column;gap:14px}
+.libsec h3{font-size:1.15rem}
+.empty{font-family:var(--mono);color:var(--muted);padding:40px 0}
+
+/* about / intro overlays */
+.overlay{position:fixed;inset:0;z-index:40;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:max(24px,env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-left,0px))}
+#intro .type{font-family:var(--mono);font-size:clamp(.95rem,1.4vw,1.1rem);line-height:1.9;max-width:34em;min-height:8em;white-space:pre-wrap}
+#intro .type::after{content:"▌";animation:blink 1s steps(1) infinite;margin-left:2px}
+#intro .skip{position:absolute;bottom:calc(64px + env(safe-area-inset-bottom,0px));font-family:var(--mono);font-size:.875rem;letter-spacing:.06em}
+@keyframes blink{50%{opacity:0}}
+#about .box{max-width:40em;display:flex;flex-direction:column;gap:18px}
+#about .close{position:absolute;top:calc(18px + env(safe-area-inset-top,0px));right:max(24px,env(safe-area-inset-right,0px));font-family:var(--mono);font-size:.875rem}
+
+@media (max-width:980px){
+  .stagger{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .stagger .tile:nth-child(even){margin-top:0}
+  .stagger .tile:nth-child(3n+2){margin-top:40px}
+  .wall-mini{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .tools{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .catgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .steps-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .book{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:720px){
+  :root{--head:96px}
+  header{grid-template-columns:1fr auto;grid-template-rows:auto auto;padding-top:calc(10px + env(safe-area-inset-top,0px));align-content:center;row-gap:8px}
+  header nav{grid-column:1 / -1;grid-row:2;gap:12px;font-size:.8rem}
+  .cover,.case,.cols{grid-template-columns:minmax(0,1fr)}
+  .collage{max-width:360px}
+  .case .art{max-width:220px}
+  .stagger{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 18px}
+  .stagger .tile:nth-child(n){margin-top:0}
+  .stagger .tile:nth-child(even){margin-top:36px}
+  .compare{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .compare .arrow{display:none}
+  .compare>div{padding-right:12px}
+  .wall-mini{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .wall-mini .tile:nth-child(even){margin-top:0}
+  .wall-mini .tile:nth-child(3n+2){margin-top:30px}
+  .tl{flex-direction:column;border-top:0}
+  .tl>div{flex:none!important;display:grid;grid-template-columns:40px 1fr;column-gap:14px;padding:0 0 12px}
+  .tl .bar{grid-row:1 / span 3;height:auto;min-height:64px}
+  .rows>div{grid-template-columns:2.6em minmax(0,1fr)}
+  .rows>div p{grid-column:2}
+  .wallgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 24px}
+  .wallgrid .tile:nth-child(even){margin-top:48px}
+  .listing button{grid-template-columns:2.8em 40px minmax(0,1fr)}
+  .listing .kind{display:none}
+  .catgrid{grid-template-columns:minmax(0,1fr);gap:14px}
+  .steps-grid,.steps-grid.g2,.lyrics{grid-template-columns:minmax(0,1fr)}
+  .ba{grid-template-columns:minmax(0,1fr)}
+  .ba .arrow{transform:rotate(90deg);justify-self:center}
+  .thumbs{gap:4px}
+  .tools{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 14px}
+  .tool p{display:none}
+  .libbar{top:-20px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header>
+  <div class="brand">AI × 失智據點認知活動</div>
+  <nav aria-label="檢視方式">
+    <button data-view="deck" aria-pressed="true" class="br"><span>簡報</span></button>
+    <button data-view="wall" aria-pressed="false" class="br"><span>卡片牆</span></button>
+    <button data-view="list" aria-pressed="false" class="br"><span>目錄</span></button>
+    <button data-view="tools" aria-pressed="false" class="br"><span>工具庫</span></button>
+  </nav>
+  <button class="about" id="aboutBtn">關於這份簡報</button>
+</header>
+
+<main>
+  <section id="deck" class="view" aria-live="polite"></section>
+  <section id="wall" class="view" hidden><div class="wallgrid"></div></section>
+  <section id="list" class="view" hidden><div class="listing"></div></section>
+  <section id="tools" class="view" hidden>
+    <div class="lib">
+      <div class="libbar">
+        <label for="q" class="mono muted">搜尋</label>
+        <input id="q" type="search" placeholder="例如：猜歌、著色、找碴、紙本" autocomplete="off">
+        <div id="chips" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+      </div>
+      <div id="libout" style="display:flex;flex-direction:column;gap:40px"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="pager" id="pager">
+    <button id="prev" class="br" aria-label="上一頁">←</button>
+    <button id="next" class="br" aria-label="下一頁">→</button>
+  </div>
+  <div class="count" id="count"></div>
+</footer>
+
+<div id="zoom" hidden role="dialog" aria-modal="true" aria-label="放大檢視"><div class="zc" id="zc"></div><span class="zhint">點任意處或按 Esc 關閉</span></div>
+<button id="selbtn" class="br" hidden>放大</button>
+
+<div class="overlay" id="intro" hidden>
+  <div class="type" id="typer"></div>
+  <button class="skip br" id="skip">略過</button>
+</div>
+
+<div class="overlay" id="about" hidden>
+  <button class="close br" id="aboutClose">關閉</button>
+  <div class="box">
+    <div class="eyebrow"><b>關於這份簡報</b></div>
+    <h2>如何用 AI 媒介翻轉失智據點認知活動</h2>
+    <p class="body">給失智社區服務據點的帶領者、照服員與志工。內容包含五個可直接帶的 AI 共創活動、一堂 90 分鐘課程的時間配置、倫理守則與成效紀錄方式。</p>
+    <p class="body">版面致敬烏拉圭的 <a href="https://www.197historiasilustradas.com/" target="_blank" rel="noopener">197 Historias Ilustradas</a>：一人一張插畫，讓每段人生被記得。卡片上的圖案為示意圖形。</p>
+    <p class="body">[ 工具庫 ] 收錄 47 個現成的長輩活動網頁，分成 8 類，附畫面截圖，可搜尋，點卡片在新分頁開啟。</p>
+    <p class="body">點任何一段文字或圖片，就會放大到全螢幕，方便大家看清楚重點；用滑鼠選取幾個字，再按 [ 放大 ]，可以只強調那一串字。按 Esc 或點任意處關閉。</p>
+    <p class="body">五個案例後面都有「實作」頁：我們實際用 Gemini 與 Suno 做出成品，每一步都附上操作截圖。</p>
+    <p class="mono muted">鍵盤 ← → 或空白鍵翻頁 · G 卡片牆 · L 目錄 · T 工具庫 · 手機可左右滑動</p>
+  </div>
+</div>
+
+<script>
+/* ---------- tile artwork ---------- */
+const C = n => getComputedStyle(document.documentElement).getPropertyValue('--'+n).trim();
+function pattern(p, col){
+  let s='';
+  if(p==='rays'){for(let i=0;i<36;i+=2){const a=i*10*Math.PI/180,b=(i+1)*10*Math.PI/180;
+      s+=`<polygon points="50,50 ${50+90*Math.cos(a)},${50+90*Math.sin(a)} ${50+90*Math.cos(b)},${50+90*Math.sin(b)}" fill="${col}" opacity=".55"/>`;}}
+  else if(p==='dots'){for(let x=5;x<100;x+=10)for(let y=5;y<100;y+=10)s+=`<circle cx="${x}" cy="${y}" r="1.8" fill="${col}" opacity=".6"/>`;}
+  else if(p==='stripes'){for(let i=-100;i<100;i+=12)s+=`<line x1="${i}" y1="100" x2="${i+100}" y2="0" stroke="${col}" stroke-width="5" opacity=".45"/>`;}
+  else if(p==='ring'){for(let r=10;r<80;r+=10)s+=`<circle cx="50" cy="50" r="${r}" fill="none" stroke="${col}" stroke-width="2.5" opacity=".5"/>`;}
+  else if(p==='sun'){s=`<circle cx="50" cy="104" r="62" fill="${col}" opacity=".75"/>`;}
+  else if(p==='grid'){for(let i=10;i<100;i+=10)s+=`<line x1="${i}" y1="0" x2="${i}" y2="100" stroke="${col}" stroke-width="1" opacity=".5"/><line x1="0" y1="${i}" x2="100" y2="${i}" stroke="${col}" stroke-width="1" opacity=".5"/>`;}
+  else if(p==='blob'){s=`<path d="M18 30 C 30 6, 70 8, 82 28 S 92 78, 64 86 S 10 84, 14 58 Z" fill="${col}" opacity=".7"/>`;}
+  return s;
+}
+const ICON = {
+  photo:(k,w)=>`<rect x="24" y="28" width="52" height="44" fill="${w}" stroke="${k}" stroke-width="3.5"/><path d="M28 66 L44 48 L54 58 L62 50 L72 66 Z" fill="${k}"/><circle cx="62" cy="39" r="5" fill="${k}"/>`,
+  note:(k,w)=>`<path d="M42 30 L70 24 L70 62" fill="none" stroke="${k}" stroke-width="4.5" stroke-linejoin="round"/><path d="M42 30 L42 68" stroke="${k}" stroke-width="4.5"/><ellipse cx="35" cy="69" rx="9" ry="7" fill="${k}"/><ellipse cx="63" cy="63" rx="9" ry="7" fill="${k}"/>`,
+  bubble:(k,w)=>`<path d="M22 30 H78 V64 H46 L32 76 V64 H22 Z" fill="${w}" stroke="${k}" stroke-width="3.5" stroke-linejoin="round"/><circle cx="38" cy="47" r="3.6" fill="${k}"/><circle cx="50" cy="47" r="3.6" fill="${k}"/><circle cx="62" cy="47" r="3.6" fill="${k}"/>`,
+  brush:(k,w)=>`<path d="M68 22 L78 32 L50 60 L40 50 Z" fill="${w}" stroke="${k}" stroke-width="3.5" stroke-linejoin="round"/><path d="M40 50 L50 60 C 46 72, 32 78, 22 76 C 28 70, 26 58, 40 50 Z" fill="${k}"/>`,
+  book:(k,w)=>`<path d="M50 32 C 40 26, 28 26, 20 28 V72 C 28 70, 40 70, 50 76 C 60 70, 72 70, 80 72 V28 C 72 26, 60 26, 50 32 Z" fill="${w}" stroke="${k}" stroke-width="3.5" stroke-linejoin="round"/><path d="M50 32 V76" stroke="${k}" stroke-width="3.5"/><path d="M28 40 H42 M28 48 H42 M58 40 H72 M58 48 H72" stroke="${k}" stroke-width="2.5"/>`,
+  eye:(k,w)=>`<path d="M16 50 C 30 30, 70 30, 84 50 C 70 70, 30 70, 16 50 Z" fill="${w}" stroke="${k}" stroke-width="3.5"/><circle cx="50" cy="50" r="11" fill="${k}"/><circle cx="54" cy="46" r="3" fill="${w}"/>`,
+  clock:(k,w)=>`<circle cx="50" cy="50" r="27" fill="${w}" stroke="${k}" stroke-width="3.5"/><path d="M50 34 V50 L61 57" fill="none" stroke="${k}" stroke-width="4" stroke-linecap="round"/>`,
+  radio:(k,w)=>`<rect x="20" y="38" width="60" height="38" rx="3" fill="${w}" stroke="${k}" stroke-width="3.5"/><path d="M30 38 L62 22" stroke="${k}" stroke-width="3"/><circle cx="38" cy="57" r="9" fill="${k}"/><path d="M56 50 H72 M56 57 H72 M56 64 H72" stroke="${k}" stroke-width="2.5"/>`,
+  heart:(k,w)=>`<path d="M50 76 C 20 56, 18 34, 34 28 C 42 25, 48 30, 50 36 C 52 30, 58 25, 66 28 C 82 34, 80 56, 50 76 Z" fill="${k}"/>`,
+  shield:(k,w)=>`<path d="M50 20 L76 30 V50 C 76 66, 64 76, 50 82 C 36 76, 24 66, 24 50 V30 Z" fill="${w}" stroke="${k}" stroke-width="3.5" stroke-linejoin="round"/><path d="M38 50 L47 59 L63 42" fill="none" stroke="${k}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`,
+  chart:(k,w)=>`<path d="M22 22 V78 H80" fill="none" stroke="${k}" stroke-width="3.5"/><rect x="30" y="56" width="10" height="18" fill="${k}"/><rect x="46" y="44" width="10" height="30" fill="${k}"/><rect x="62" y="32" width="10" height="42" fill="${k}"/>`,
+  people:(k,w)=>`<circle cx="38" cy="38" r="10" fill="${k}"/><circle cx="64" cy="42" r="8" fill="${w}" stroke="${k}" stroke-width="3"/><path d="M20 76 C 20 58, 56 58, 56 76 Z" fill="${k}"/><path d="M50 76 C 52 62, 80 62, 80 76 Z" fill="${w}" stroke="${k}" stroke-width="3"/>`,
+  spark:(k,w)=>`<path d="M50 18 L57 43 L82 50 L57 57 L50 82 L43 57 L18 50 L43 43 Z" fill="${k}"/>`,
+  house:(k,w)=>`<path d="M22 50 L50 26 L78 50" fill="none" stroke="${k}" stroke-width="4" stroke-linejoin="round"/><rect x="30" y="48" width="40" height="28" fill="${w}" stroke="${k}" stroke-width="3.5"/><rect x="45" y="58" width="10" height="18" fill="${k}"/>`,
+  film:(k,w)=>`<rect x="22" y="28" width="56" height="44" fill="${w}" stroke="${k}" stroke-width="3.5"/><path d="M44 40 L60 50 L44 60 Z" fill="${k}"/><path d="M22 36 H78 M22 64 H78" stroke="${k}" stroke-width="2"/>`,
+  dice:(k,w)=>`<rect x="26" y="26" width="48" height="48" rx="6" fill="${w}" stroke="${k}" stroke-width="3.5"/><circle cx="38" cy="38" r="4" fill="${k}"/><circle cx="50" cy="50" r="4" fill="${k}"/><circle cx="62" cy="62" r="4" fill="${k}"/>`,
+  question:(k,w)=>`<path d="M36 38 C 36 22, 66 22, 64 38 C 63 48, 50 48, 50 60" fill="none" stroke="${k}" stroke-width="6" stroke-linecap="round"/><circle cx="50" cy="73" r="4.5" fill="${k}"/>`,
+  leaf:(k,w)=>`<path d="M26 74 C 24 40, 48 22, 78 24 C 78 56, 58 76, 26 74 Z" fill="${k}"/><path d="M28 72 C 42 56, 56 44, 70 32" stroke="${w}" stroke-width="3" fill="none"/>`,
+  face:(k,w)=>`<circle cx="50" cy="50" r="26" fill="${w}" stroke="${k}" stroke-width="3.5"/><circle cx="41" cy="46" r="3.2" fill="${k}"/><circle cx="59" cy="46" r="3.2" fill="${k}"/><path d="M40 58 C 45 64, 55 64, 60 58" fill="none" stroke="${k}" stroke-width="3" stroke-linecap="round"/><circle cx="36" cy="56" r="4" fill="var(--pink)" opacity=".9"/><circle cx="64" cy="56" r="4" fill="var(--pink)" opacity=".9"/>`,
+  sprout:(k,w)=>`<path d="M50 80 V50" stroke="${k}" stroke-width="4"/><path d="M50 52 C 36 52, 28 42, 28 30 C 42 30, 50 38, 50 52 Z" fill="${k}"/><path d="M50 46 C 62 46, 72 38, 72 26 C 60 26, 50 32, 50 46 Z" fill="${w}" stroke="${k}" stroke-width="3"/>`,
+};
+function art(spec){
+  const [bg,pat,pc,icon,ink='#171717',paper='#FAFAFA']=spec;
+  const col=v=>v.startsWith('#')?v:`var(--${v})`;
+  return `<div class="art" aria-hidden="true"><svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice"><rect width="100" height="100" fill="${col(bg)}"/>${pattern(pat,col(pc))}${ICON[icon](ink,paper)}</svg></div>`;
+}
+function tile(n,label,spec,extra=''){return `<div class="tile"><div class="cap"><span>${n}.</span><span>${label}</span></div>${art(spec)}${extra}</div>`}
+
+/* ---------- slides ---------- */
+const S = [];
+const add = (title,kind,spec,html)=>S.push({title,kind,spec,html});
+
+add('封面','cover',['cobalt','rays','sky','spark','#171717'],`
+<div class="cover">
+  <div style="display:flex;flex-direction:column;gap:28px;min-width:0">
+    <div class="eyebrow"><b>失智社區服務據點</b><span>認知促進活動工作坊</span></div>
+    <h1>如何用 AI 媒介<br>翻轉失智據點<br>認知活動</h1>
+    <p class="lead">讓長輩說出的那段人生，當場變成一張畫、一首歌、一本繪本。</p>
+    <p class="mono muted">按 → 開始　·　[ 卡片牆 ] 一次看全部　·　點文字或圖片可放大</p>
+  </div>
+  <div class="collage">
+    ${tile('01','懷舊插畫',['red','rays','pink','photo'])}
+    ${tile('02','專屬歌曲',['yellow','dots','orange','note'])}
+    ${tile('03','語音對話',['teal','ring','sky','bubble','#171717'])}
+    ${tile('04','猜猜畫',['lilac','grid','cobalt','question'])}
+    ${tile('05','生命繪本',['sky','sun','yellow','book'])}
+    ${tile('06','據點故事牆',['green','stripes','teal','people','#171717'])}
+  </div>
+</div>`);
+
+add('現場的五個難題','problem',['sand','dots','orange','question'],`
+<div class="eyebrow"><b>01 現場</b><span>帶過據點課程的人都遇過</span></div>
+<h2>每週一堂認知課，難在哪裡？</h2>
+<div class="stagger">
+  ${tile('01','教材重複',['sand','stripes','orange','dice'],'<h3>著色、拼圖、學習單輪流用</h3><p class="muted">長輩做久了，覺得是在「寫功課」。</p>')}
+  ${tile('02','程度落差',['pink','dots','red','people'],'<h3>同一班從輕度到中度都有</h3><p class="muted">一份教材很難同時照顧到每個人。</p>')}
+  ${tile('03','人力有限',['sky','ring','cobalt','clock'],'<h3>一位帶領者面對十幾位長輩</h3><p class="muted">備課時間少，個別互動更少。</p>')}
+  ${tile('04','被動參與',['yellow','sun','orange','eye'],'<h3>長輩多半坐著看、跟著做</h3><p class="muted">主動開口說話的時間不多。</p>')}
+  ${tile('05','成效難見',['lilac','grid','cobalt','chart'],'<h3>做完就收起來了</h3><p class="muted">家屬與主管看不到長輩的改變。</p>')}
+</div>`);
+
+add('觀念轉換','shift',['teal','stripes','sky','spark'],`
+<div class="eyebrow"><b>02 轉換</b><span>AI 放進課堂後，角色怎麼變</span></div>
+<h2>把 AI 當成「媒介」：<br>它負責畫、唱、說，長輩負責想、選、講。</h2>
+<div class="compare">
+  <div class="hd">過去的課堂</div><div class="hd arrow"></div><div class="hd">加入 AI 媒介後</div>
+  <div>帶領者講，長輩聽</div><div class="arrow">→</div><div class="new">長輩說，AI 當場畫出來</div>
+  <div>每人拿同一份學習單</div><div class="arrow">→</div><div class="new">每人一份專屬作品</div>
+  <div>以紙筆為主</div><div class="arrow">→</div><div class="new">看、聽、說、唱，多感官並用</div>
+  <div>活動結束就收起來</div><div class="arrow">→</div><div class="new">累積成個人生命故事檔案</div>
+  <div>帶領者準備所有內容</div><div class="arrow">→</div><div class="new">長輩的回憶就是教材</div>
+</div>`);
+
+add('核心理念','quote',['yellow','sun','orange','heart'],`
+<div class="eyebrow"><b>核心理念</b></div>
+<p class="quote">AI 是媒介，<mark>長輩的故事</mark>才是主角。<br>帶領者仍是那個點火的人。</p>
+<p class="body muted" style="max-width:36em">科技負責把記憶「具象化」，讓長輩看得到、聽得到、拿得到；引導、陪伴與接住情緒，還是人來做。</p>`);
+
+add('五種 AI 媒介','media',['cobalt','grid','lilac','film','#171717'],`
+<div class="eyebrow"><b>03 工具</b><span>據點用得到的五種媒介</span></div>
+<h2>五種 AI 媒介，各自喚起不同感官</h2>
+<div class="stagger">
+  ${tile('01','圖像生成',['red','rays','pink','brush'],'<h3>口述變插畫</h3><p class="muted">把回憶畫成看得見的畫面。<br>ChatGPT、Gemini、Canva</p>')}
+  ${tile('02','歌曲生成',['yellow','dots','orange','note'],'<h3>故事變歌曲</h3><p class="muted">台語、國語老歌風都能做。<br>Suno 等音樂生成工具</p>')}
+  ${tile('03','語音對話',['teal','ring','sky','radio'],'<h3>開口就能聊</h3><p class="muted">手機語音模式，不用打字。<br>ChatGPT、Gemini 語音</p>')}
+  ${tile('04','動態影像',['lilac','stripes','cobalt','film'],'<h3>照片動起來</h3><p class="muted">老照片轉短片、做成回憶影片。<br>影片生成、剪映範本</p>')}
+  ${tile('05','互動網頁',['green','grid','teal','dice','#171717'],'<h3>客製小遊戲</h3><p class="muted">用 AI 寫出投影用的猜謎、配對。<br>Claude、ChatGPT</p>')}
+</div>`);
+
+add('對應認知功能','matrix',['sky','grid','cobalt','eye'],`
+<div class="eyebrow"><b>04 對應</b><span>活動設計要對準認知面向</span></div>
+<h2>每個活動，都對準一個認知面向</h2>
+<div class="tbl-wrap"><table>
+  <thead><tr><th>認知面向</th><th>AI 共創活動</th><th>AI 扮演的角色</th></tr></thead>
+  <tbody>
+    <tr><td><span class="dot" style="background:var(--red)"></span>長期記憶</td><td>懷舊插畫、生命故事繪本</td><td>把口述的場景畫出來，讓長輩指認、修正</td></tr>
+    <tr><td><span class="dot" style="background:var(--yellow)"></span>語言表達</td><td>專屬歌曲填詞、時光機電台</td><td>需要長輩說得越具體，生成結果越像</td></tr>
+    <tr><td><span class="dot" style="background:var(--teal)"></span>注意力</td><td>AI 畫什麼？猜猜看</td><td>畫面逐步出現，需要持續盯著看</td></tr>
+    <tr><td><span class="dot" style="background:var(--cobalt)"></span>視空間</td><td>找不同、拼回原圖</td><td>生成兩張只差一處的圖</td></tr>
+    <tr><td><span class="dot" style="background:var(--orange)"></span>執行功能</td><td>繪本排序、歌曲段落安排</td><td>產出素材，由長輩決定順序與取捨</td></tr>
+    <tr><td><span class="dot" style="background:var(--green)"></span>現實導向</td><td>今日電台開場、季節插畫</td><td>以日期、節氣、天氣開場聊天</td></tr>
+  </tbody>
+</table></div>`);
+
+const caseSlide=(no,name,spec,meta,steps,goals,tip,sub)=>`
+<div class="eyebrow"><b>案例 ${no}</b><span>${sub}</span></div>
+<div class="case">
+  ${tile(no,name,spec)}
+  <div style="display:flex;flex-direction:column;gap:20px;min-width:0">
+    <h2>${name}</h2>
+    <div class="meta">${meta.map(m=>`<span>${m}</span>`).join('')}</div>
+    <ol class="steps">${steps.map((s,i)=>`<li data-n="${String(i+1).padStart(2,'0')}">${s}</li>`).join('')}</ol>
+    <div class="chips">${goals.map(g=>`<span class="chip">${g}</span>`).join('')}</div>
+    <div class="tip"><span>帶領提醒</span><p>${tip}</p></div>
+  </div>
+</div>`;
+
+/* hands-on demo helpers: real screenshots captured from Gemini & Suno on 2026-11-26 */
+const step=(n,img,cap)=>`<figure class="step"><img src="howto/${img}.jpg" alt="步驟 ${n}：${cap.replace(/<[^>]+>/g,'')}" loading="lazy"><figcaption><b>${n}</b><span>${cap}</span></figcaption></figure>`;
+const note=(label,html)=>`<div class="step note"><span>${label}</span><p>${html}</p></div>`;
+const demoHead=(no,title,tool)=>`<div class="eyebrow"><b>實作 ${no}</b><span>${tool}</span><span>點截圖可放大</span></div><h2>${title}</h2>`;
+const BOOK=[
+ ['童年的甘甜','細漢佇雲林蔗園，偷啃甘蔗上界甜。'],
+ ['少年的汗水','少年時佇糖廠做工，推五分車真骨力。'],
+ ['一生的伴侶','二十五歲娶著阿月，是我一世人的福氣。'],
+ ['市場的歲月','佇北港菜市仔賣菜，一賣就是三十年。'],
+ ['現在的快樂','這馬逐禮拜來據點唱歌，心情真快活。'],
+];
+const GUESS=[['c3-img1','大同電鍋'],['c3-img2','腳踩式縫紉機']];
+
+add('案例 01 懷舊插畫','case',['red','rays','pink','photo'],caseSlide('01','一張畫，回到那一年',['red','rays','pink','photo'],
+ ['圖像生成','40 分鐘','6–10 人','投影機＋筆電'],
+ ['拿出老物件或老照片暖身：碗公、斗笠、黑白照片','引導提問：「那時候你住在哪裡？穿什麼？身邊有誰？」','帶領者把長輩的回答整理成提示詞，現場生成 2–3 張','請長輩挑選並指正：「不對，那時候屋頂是紅瓦。」','修正後印出，寫上名字與年代，貼上故事牆'],
+ ['長期記憶','語言表達','自我認同'],
+ '長輩指正畫面的那一刻最珍貴，代表他正在提取記憶。畫錯了反而是好事，別急著一次畫對。','懷舊插畫'));
+
+add('實作 01 操作步驟','demo',['red','rays','pink','photo'],`
+${demoHead('01','用 Gemini 畫出阿嬌姨的稻埕','Gemini 生圖・約 3 分鐘')}
+<div class="steps-grid">
+  ${step('01','c1-1','輸入提示詞：年代、地點、人物、動作、細節五個欄位，加上「不要出現文字」')}
+  ${step('02','c1-2','約 20 秒，Gemini 畫出第一張，投影給長輩看')}
+  ${step('03','c1-3','長輩說「不對」，把原話直接貼上，AI 回答看不懂')}
+  ${step('04','c1-4','改成「請根據上一張圖修改：A 換成 B」，一項一項列出')}
+  ${step('05','c1-5','修改完成，其他畫面維持不變')}
+  ${note('實作心得','第一次修改失敗是真實狀況。轉述長輩的話時，用 <code>請根據上一張圖修改：</code> 開頭，再逐項寫「把○○換成○○」，成功率最高。')}
+</div>`);
+
+add('實作 01 成品對照','demo',['red','rays','pink','photo'],`
+${demoHead('01','長輩一句「不對」，畫面就更像她的記憶','成品')}
+<div class="ba">
+  <figure><img src="howto/c1-img1.jpg" alt="第一版：戴斗笠的女生與黃狗在稻埕曬穀"><figcaption>第一版　AI 依提示詞畫出</figcaption></figure>
+  <span class="arrow" aria-hidden="true">→</span>
+  <figure><img src="howto/c1-img2.jpg" alt="修改版：綁紅色花布頭巾的女生、黑色土狗與稻草堆"><figcaption>修改版　阿嬌姨指正後</figcaption></figure>
+</div>
+<div class="chips"><span class="chip">斗笠 → 紅色花布頭巾</span><span class="chip">黃狗 → 黑色土狗</span><span class="chip">＋ 背景稻草堆</span></div>`);
+
+add('案例 02 專屬歌曲','case',['yellow','dots','orange','note'],caseSlide('02','為你寫一首歌',['yellow','dots','orange','note'],
+ ['歌曲生成','50 分鐘','全班','藍牙喇叭'],
+ ['收集關鍵字：家鄉地名、做過的工作、最愛吃的菜','大家一起把關鍵字串成四句歌詞，寫在白板上','選曲風：台語老歌、日式演歌、校園民歌','AI 生成歌曲後，全班跟著打拍子合唱','把歌和歌詞存進長輩的作品資料夾'],
+ ['語言流暢','注意力','情緒連結'],
+ '曲風選長輩年輕時熟悉的年代。副歌放進長輩的名字，第一次聽到時的表情，就是這堂課的成果。','音樂與語言'));
+
+add('實作 02 操作步驟','demo',['yellow','dots','orange','note'],`
+${demoHead('02','Gemini 寫詞，Suno 譜曲','Gemini＋Suno・約 5 分鐘')}
+<div class="steps-grid">
+  ${step('01','c2-1','在 Gemini 輸入關鍵字：家鄉、工作、最愛的菜、名字，指定台語老歌風格')}
+  ${step('02','c2-2','Gemini 寫出主歌與副歌，副歌唱到「清水伯」')}
+  ${step('03','c2-3','請 Gemini 唱出來，它做不到，要換成音樂生成工具')}
+  ${step('04','c2-4','打開 Suno，切到 Advanced，把歌詞貼進 Lyrics')}
+  ${step('05','c2-5','在 Styles 填曲風：台語老歌、慢板、吉他、手風琴、溫暖男聲')}
+  ${step('06','c2-6','按 Create，不到一分鐘產生多個版本，挑一首播放')}
+</div>`);
+
+add('實作 02 成品','demo',['yellow','dots','orange','note'],`
+${demoHead('02','〈故鄉雲林的甘蔗香〉','成品・Suno 生成')}
+<div class="lyrics">
+  <div><span>主歌</span>雲林故鄉日頭赤炎炎<br>少年糖廠打拚流汗衫<br>阿母灶腳炒的菜脯蛋<br>古早滋味永遠記心肝</div>
+  <div><span>副歌</span>人講我是快樂清水伯<br>蔗埕風吹想起彼當初<br>一生勤儉平安就是福<br>歡喜唱歌大家來照顧</div>
+</div>
+<p class="mono muted">Styles：Taiwanese Hokkien oldies, slow ballad, acoustic guitar, accordion, warm male vocal, nostalgic, 1960s</p>
+<a class="linkbtn br" href="https://suno.com/song/2cfcb5d8-da40-4779-9775-191caf264c44" target="_blank" rel="noopener">在 Suno 聽這首歌 ↗</a>`);
+
+add('案例 03 猜猜畫','case',['lilac','grid','cobalt','question'],caseSlide('03','AI 畫什麼？猜猜看',['lilac','grid','cobalt','question'],
+ ['圖像生成','30 分鐘','分兩組','投影機'],
+ ['事先生成一組懷舊物品圖：大同電鍋、縫紉機、黑白電視','投影時先遮住大半，每 10 秒露出一塊','兩組搶答，答對的人說一段和物品有關的回憶','反過來玩：長輩描述一樣東西，AI 畫，看像不像'],
+ ['注意力','視空間','語言理解'],
+ '描述題請長輩說顏色、大小、用途三件事。描述得越完整，AI 畫得越像，長輩會自己發現「要說清楚」。','遊戲化練習'));
+
+add('實作 03 猜猜看','demo',['lilac','grid','cobalt','question'],`
+${demoHead('03','先用 AI 備好題目，再一格一格翻開','Gemini 生圖・可直接在這頁玩')}
+<div class="cols" style="align-items:start">
+  <div class="steps-grid g2" style="grid-template-columns:minmax(0,1fr)">
+    ${step('01','c3-1','提示詞寫明「物品居中、背景簡單、不要文字」，畫面才好猜')}
+    ${step('02','c3-2','接著說「再畫一張，同樣風格：腳踩式縫紉機」，一次備好整組題目')}
+  </div>
+  <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+    <div class="reveal" id="reveal"><img id="revealImg" src="howto/c3-img1.jpg" alt="猜謎題目圖片"><div class="cells" id="cells"></div></div>
+    <div class="ctrl"><button class="br" data-act="rv-one">翻一格</button><button class="br" data-act="rv-all">全部揭曉</button><button class="br" data-act="rv-next">下一題</button><span class="muted" id="rvCount"></span></div>
+    <p class="answer" id="rvAnswer" aria-live="polite"></p>
+  </div>
+</div>`);
+
+add('案例 04 時光機電台','case',['teal','ring','sky','radio'],caseSlide('04','時光機電台',['teal','ring','sky','radio'],
+ ['語音對話','30 分鐘','全班','手機＋喇叭'],
+ ['設定 AI 扮演 1960 年代的廣播主持人','開場報今天的日期、節氣與天氣，請長輩一起確認','長輩輪流「call in」：點歌、說說當年的事','主持人追問細節，帶領者在旁轉述、放慢節奏'],
+ ['現實導向','語言表達','社會互動'],
+ '語音模式請調慢語速、放大音量。AI 聽不清楚時由帶領者複述，別讓長輩因為「機器聽不懂」而洩氣。','語音互動'));
+
+add('實作 04 操作步驟','demo',['teal','ring','sky','radio'],`
+${demoHead('04','讓 AI 變成「阿秀姐」電台主持人','Gemini 角色扮演・約 2 分鐘')}
+<div class="steps-grid g2">
+  ${step('01','c4-1','貼上角色設定：身分、開場要報日期節氣、每次只說 3–4 句、call in 時要追問')}
+  ${step('02','c4-2','阿秀姐開場：報出 11 月 26 日、剛過「小雪」，請大家看日曆確認')}
+  ${step('03','c4-3','清水伯 call in 點〈望春風〉，主持人接著追問當年在糖廠的工作')}
+  <div class="step note"><span>角色設定提示詞　可直接複製</span>
+    <p class="prompt" id="radioPrompt" style="font-size:.85rem">請你扮演 1960 年代台灣廣播電台的主持人「阿秀姐」，主持給長輩聽的點歌節目。規則：1. 先報今天的日期、季節和節氣，請聽眾一起確認。2. 每次只說 3 到 4 句，用簡單國語夾一點台語。3. 聽眾 call in 時，先問他叫什麼、住哪裡，再追問一個當年的細節。現在請開場。</p>
+    <button class="br mono" data-act="copy" data-src="radioPrompt" style="align-self:flex-start">複製提示詞</button>
+  </div>
+</div>`);
+
+add('案例 05 生命故事繪本','case',['sky','sun','yellow','book'],caseSlide('05','我的生命故事繪本',['sky','sun','yellow','book'],
+ ['綜合','6–8 週','個人作品','相印機或影印'],
+ ['每週累積一張插畫：童年、求學、工作、成家、現在','第 6 週把作品攤開，請長輩自己排出人生順序','為每一頁說一句話，由志工記下來','裝訂成冊，結業時邀請家屬來聽長輩發表'],
+ ['執行功能','長期記憶','家庭連結'],
+ '排序時允許長輩跳著排。他覺得重要的放前面，本來就是故事的一部分。','長期課程'));
+
+add('實作 05 操作步驟','demo',['sky','sun','yellow','book'],`
+${demoHead('05','五段回憶，變成一本五頁繪本','Gemini 文字＋生圖・約 6 分鐘')}
+<div class="steps-grid g2">
+  ${step('01','c5-1','把長輩說過的五段回憶打進去，要求每頁一句、不超過 20 字、用他的口吻')}
+  ${step('02','c5-2','Gemini 整理出 5 頁繪本文字，並替每頁寫好畫面提示詞')}
+  ${step('03','c5-3','請它依第 1 頁畫圖，並固定主角長相：圓臉、濃眉、溫暖笑容')}
+  ${step('04','c5-4','一頁一頁畫下去，第 5 頁加一句「主角變成白髮阿公」')}
+</div>`);
+
+add('實作 05 繪本成品','demo',['sky','sun','yellow','book'],`
+${demoHead('05','清水伯的生命故事','成品・點縮圖翻頁')}
+<div class="book" id="book">
+  <div class="page"><img id="bookImg" src="howto/c5-p1.jpg" alt="繪本第 1 頁插畫"></div>
+  <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+    <span class="pno" id="bookNo">第 1 / 5 頁</span>
+    <span class="ttl" id="bookTtl">${BOOK[0][0]}</span>
+    <p class="line" id="bookLine">${BOOK[0][1]}</p>
+    <div class="ctrl"><button class="br" data-act="bk-prev">上一頁</button><button class="br" data-act="bk-next">下一頁</button></div>
+    <div class="thumbs">${BOOK.map((b,i)=>`<button data-act="bk-go" data-n="${i}" aria-label="第 ${i+1} 頁 ${b[0]}" aria-current="${i===0}"><img src="howto/c5-p${i+1}.jpg" alt=""></button>`).join('')}</div>
+  </div>
+</div>`);
+
+add('故事牆的啟發','story',['green','stripes','teal','people','#171717'],`
+<div class="eyebrow"><b>05 延伸</b><span>從一張畫到一面牆</span></div>
+<div class="cols" style="align-items:start">
+  <div style="display:flex;flex-direction:column;gap:18px;min-width:0">
+    <h2>一個人，一張插畫，<br>一段被記得的故事</h2>
+    <p class="body">烏拉圭的《197 Historias Ilustradas》邀請插畫家，為 197 位失蹤者各畫一張肖像，排成一面可以逐一點開的故事牆。</p>
+    <p class="body">據點也可以有自己的故事牆：每位長輩一張插畫、一段口述、一首歌。走進據點，就看見這裡每個人的人生。</p>
+    <p class="mono muted">右側為示意，姓名與年代皆為範例</p>
+  </div>
+  <div class="wall-mini">
+    ${tile('01','阿嬌姨',['red','rays','pink','face'])}
+    ${tile('02','清水伯',['teal','ring','sky','face'])}
+    ${tile('03','美雲',['yellow','dots','orange','face'])}
+    ${tile('04','金樹伯',['cobalt','grid','lilac','face','#171717'])}
+    ${tile('05','秀英',['pink','sun','red','face'])}
+    ${tile('06','阿德',['green','stripes','teal','face','#171717'])}
+    ${tile('07','玉蘭',['lilac','dots','cobalt','face'])}
+    ${tile('08','春生伯',['sand','rays','orange','face'])}
+    ${tile('09','麗卿',['sky','ring','cobalt','face'])}
+    ${tile('10','阿富',['orange','grid','yellow','face'])}
+    ${tile('11','月娥',['yellow','sun','red','face'])}
+    ${tile('12','添丁伯',['red','dots','pink','face'])}
+  </div>
+</div>`);
+
+add('一堂 90 分鐘的課','flow',['orange','stripes','yellow','clock'],`
+<div class="eyebrow"><b>06 流程</b><span>以「一張畫，回到那一年」為例</span></div>
+<h2>一堂 90 分鐘的課，時間這樣分</h2>
+<div class="tl">
+  <div style="flex:10"><div class="bar" style="background:var(--sky)"></div><span class="t">0–10′</span><h3>暖身</h3><p>日期、天氣、手指操</p></div>
+  <div style="flex:20"><div class="bar" style="background:var(--yellow)"></div><span class="t">10–30′</span><h3>回憶引導</h3><p>老物件傳遞，一人一個問題</p></div>
+  <div style="flex:30"><div class="bar" style="background:var(--red)"></div><span class="t">30–60′</span><h3>AI 共創</h3><p>口述、生成、指正、再生成，輪流上場</p></div>
+  <div style="flex:20"><div class="bar" style="background:var(--teal)"></div><span class="t">60–80′</span><h3>作品分享</h3><p>拿著自己的畫說一段</p></div>
+  <div style="flex:10"><div class="bar" style="background:var(--lilac)"></div><span class="t">80–90′</span><h3>收尾</h3><p>合唱、拍照、填紀錄</p></div>
+</div>
+<p class="body muted">AI 共創只佔三分之一。前面的回憶引導做得越好，生成的畫面越貼近長輩的記憶。</p>`);
+
+add('帶領者工具箱','kit',['sand','grid','orange','brush'],`
+<div class="eyebrow"><b>07 工具箱</b><span>開課前準備</span></div>
+<div class="cols">
+  <div style="display:flex;flex-direction:column;gap:18px;min-width:0">
+    <h2>帶領者工具箱</h2>
+    <dl class="kit">
+      <div><dt>對話與提示</dt><dd>ChatGPT、Gemini、Claude</dd></div>
+      <div><dt>插畫生成</dt><dd>ChatGPT 生圖、Gemini、Canva AI</dd></div>
+      <div><dt>歌曲生成</dt><dd>Suno 等音樂生成工具</dd></div>
+      <div><dt>語音互動</dt><dd>手機 App 的語音對話模式</dd></div>
+      <div><dt>硬體</dt><dd>筆電、投影機、藍牙喇叭、相印機</dd></div>
+      <div><dt>文件</dt><dd>肖像與作品使用同意書、作品資料夾</dd></div>
+    </dl>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:14px;min-width:0;padding-top:8px">
+    <p class="mono muted">提示詞範本　劃底色處換成長輩的回答</p>
+    <div class="prompt" id="promptText"><span class="lbl">插畫提示詞</span>請畫一張 <em>1960 年代</em> 的台灣 <em>鄉下三合院稻埕</em>，一位 <em>20 歲的女生</em> 正在 <em>曬稻穀</em>，旁邊有 <em>一隻黃狗</em>。溫暖的水彩插畫風格，畫面明亮，人物表情開心，不要出現文字。</div>
+    <button class="copy mono br" id="copyBtn" style="align-self:flex-start">複製提示詞</button>
+    <p class="body muted">固定「年代、地點、人物、動作、細節」五個欄位，帶領者只要把長輩的話填進去。</p>
+  </div>
+</div>`);
+
+add('倫理與安全','ethics',['cobalt','ring','sky','shield','#171717'],`
+<div class="eyebrow"><b>08 守則</b><span>開始之前先講好</span></div>
+<h2>使用 AI 的五條守則</h2>
+<div class="rows">
+  <div><span class="n">01</span><h3>同意先行</h3><p>長輩的肖像、聲音與故事要公開使用，先取得長輩與家屬書面同意。</p></div>
+  <div><span class="n">02</span><h3>個資不上傳</h3><p>全名、身分證、病歷、住址都不輸入 AI，以稱呼和年代代替。</p></div>
+  <div><span class="n">03</span><h3>不假扮真人</h3><p>不用 AI 模仿已故親人的聲音或影像，避免混淆與情緒傷害。</p></div>
+  <div><span class="n">04</span><h3>接住情緒</h3><p>回憶可能帶出悲傷。預留一位志工陪伴，長輩可以隨時暫停。</p></div>
+  <div><span class="n">05</span><h3>長輩是作者</h3><p>作品署名長輩本人。AI 是畫筆，創作的是說故事的人。</p></div>
+</div>`);
+
+add('看見成效','eval',['green','grid','teal','chart','#171717'],`
+<div class="eyebrow"><b>09 紀錄</b><span>讓改變被看見</span></div>
+<div class="cols" style="align-items:start">
+  <div style="display:flex;flex-direction:column;gap:18px;min-width:0">
+    <h2>四種方式，看見長輩的改變</h2>
+    <dl class="kit">
+      <div><dt>參與觀察</dt><dd>主動發言次數、專注時間、笑容</dd></div>
+      <div><dt>作品歷程</dt><dd>每週作品依日期存檔，比較描述的細節量</dd></div>
+      <div><dt>家屬回饋</dt><dd>回家是否主動分享、是否哼唱課堂歌曲</dd></div>
+      <div><dt>定期評估</dt><dd>搭配據點原有的評估工具，依期程追蹤</dd></div>
+    </dl>
+  </div>
+  <div class="sheet" style="display:flex;flex-direction:column;gap:12px;min-width:0">
+    <p class="mono muted">課堂觀察表（範例資料）</p>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>長輩</th><th>主動發言</th><th>指正畫面</th><th>專注</th><th>情緒</th></tr></thead>
+      <tbody>
+        <tr><td>阿嬌姨</td><td>6 次</td><td>2 處</td><td>●●●○</td><td>愉快</td></tr>
+        <tr><td>清水伯</td><td>2 次</td><td>1 處</td><td>●●○○</td><td>平穩</td></tr>
+        <tr><td>美雲</td><td>9 次</td><td>3 處</td><td>●●●●</td><td>愉快</td></tr>
+        <tr><td>金樹伯</td><td>1 次</td><td>0 處</td><td>●○○○</td><td>需陪伴</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</div>`);
+
+add('從下週開始','next',['pink','sun','red','sprout'],`
+<div class="eyebrow"><b>10 行動</b><span>不用一次到位</span></div>
+<h2>從下週開始的三個步驟</h2>
+<div class="rows">
+  <div><span class="n">本週</span><h3>挑一個案例試做</h3><p>建議從「一張畫，回到那一年」開始，只需要筆電和投影機。</p></div>
+  <div><span class="n">本月</span><h3>建立同意書與作品資料夾</h3><p>每位長輩一個資料夾，存插畫、歌曲與觀察紀錄。</p></div>
+  <div><span class="n">本季</span><h3>辦一場作品發表會</h3><p>邀請家屬，展出故事牆，播放長輩的專屬歌曲。</p></div>
+</div>`);
+
+/* ---------- tool library ---------- */
+const CATS=[
+ {k:'mem',  name:'懷舊回憶',     spec:['red','rays','pink','photo'],      dom:'長期記憶・語言表達', tip:'搭配案例 01、04：先用這些素材喚起回憶，再請 AI 把故事畫出來。'},
+ {k:'music',name:'音樂與律動',   spec:['yellow','dots','orange','note'],  dom:'聽覺記憶・動作協調', tip:'搭配案例 02：先猜歌熱身，再為長輩寫一首專屬歌。'},
+ {k:'rec',  name:'團康活動',     spec:['sky','rays','cobalt','people'],   dom:'社會互動・體能・反應', tip:'暖身用團康把氣氛帶起來，再進入 AI 共創；撲克牌與水瓶都是據點現成的道具。'},
+ {k:'quiz', name:'猜謎認知遊戲', spec:['teal','ring','sky','question'],   dom:'注意力・視知覺・計算', tip:'搭配案例 03：投影給全班搶答，答對的人說一段相關回憶。'},
+ {k:'paper',name:'紙本學習單生成', spec:['cobalt','grid','lilac','book','#171717'], dom:'視空間・手眼協調・計算', tip:'可調難度，同一班印出不同程度，解決程度落差。'},
+ {k:'color',name:'著色畫生成',   spec:['pink','sun','red','brush'],       dom:'專注力・視空間・情緒', tip:'選台灣老圖樣（窗櫺、花布、鐵窗花）邊塗邊聊當年的家。'},
+ {k:'craft',name:'手作藝術教學', spec:['orange','stripes','yellow','leaf'], dom:'精細動作・執行功能', tip:'動畫一步一步示範，帶領者不用先學會也能開課。'},
+ {k:'group',name:'簡報遊戲工具', spec:['lilac','dots','cobalt','film'],  dom:'反應速度・雙重任務', tip:'把實作 01、03 用 AI 畫好的圖放進簡報生成器，就是一套專屬題目。'},
+ {k:'db',   name:'教案資料庫',   spec:['green','grid','teal','chart','#171717'], dom:'備課・照顧者訓練', tip:'找活動點子、訓練志工與家屬溝通時查閱。'},
+];
+const T=(s,n,c,d)=>({s,n,c,d});
+const TOOLS=[
+ T('life-story-phonograph','時光留聲機','mem','家屬陪長輩說故事，錄下生命故事，資料只存在這台裝置。'),
+ T('reminiscence-toolbox','懷舊活動帶領網頁','mem','懷舊課需要的影片、照片、音樂與 AI 提問資源一次整理。'),
+ T('old-toys-game-rules','長者懷舊童玩資料庫','mem','陀螺、跳房子等懷舊童玩的玩法整理。'),
+ T('oldstar-geuss-game','老藝人猜猜看','mem','30 位老藝人照片，看照片猜名字。'),
+ T('political-photo','政治人物猜猜看','mem','台灣政治人物懷舊照片猜謎。'),
+ T('taiwan-different','臺灣歷史時光機大家來找碴','mem','1948–2026 八段台灣歷史場景，找出 32 處不同。'),
+ T('taiwan-festival-different','台灣節日大家來找碴','mem','八個台灣重要節日場景，找出 32 處不同。'),
+ T('taiwan-taste-island','台灣好味島','mem','3D 台灣島，點縣市看名產、景點與聊天話題。'),
+ T('oldsongdance','音樂律動全集 380 支','music','坐姿、站姿音樂律動影片，台語、國語金曲，可依年代篩選。'),
+ T('pop-song-guess','台灣金曲猜歌','music','1950 到 2026 每個年代各 20 首，新增台語歌后。'),
+ T('western-classical-old-song-guess','西洋金曲猜歌遊戲','music','20 首西洋老歌，聽前奏猜歌名。'),
+ T('finger-database','手指操影片資料庫','music','50 支手指操與雙側協調操示範影片，附帶班筆記。'),
+ T('japan-dayservice-activity-videos','日本日照團康影片庫','rec','350 支日本日照團康與體操影片，附中文玩法。'),
+ T('flower-guess-quiz','猜猜我是什麼花','quiz','40 種台灣常見花，一步一步給提示猜花名。'),
+ T('insect-guess-quiz','猜猜我是誰台灣昆蟲','quiz','20 種台灣昆蟲，附真實鳴聲錄音與影片。'),
+ T('bird-guess-quiz','猜猜我是誰台灣鳥類','quiz','40 種台灣鳥，看照片、聽叫聲猜鳥名。'),
+ T('mosaic-animation','台灣景點馬賽克翻格子猜謎','quiz','一格一格翻開馬賽克，猜台灣著名景點。'),
+ T('colored-paper-board-game','色紙雙色摺色塊認知遊戲','quiz','用雙色色紙摺出指定色塊的配對遊戲。'),
+ T('1-16-plus','數字卡加總挑戰','quiz','用 1–16 數字卡湊出指定總和。'),
+ T('random','數字抽籤器','quiz','投影用數字抽籤，可設定範圍與數量。'),
+ T('new-bingo-generator','賓果生成器大全','quiz','數字、文字、圖片賓果卡一鍵產生。'),
+ T('art-maze-generator','造型藝術迷宮生成器','paper','依造型產生迷宮紙本，可調難度。'),
+ T('draw-fine-motro-shape','描圖運筆生成器','paper','描線運筆練習紙本，訓練手眼協調。'),
+ T('math-worksheet-generator','算式生成器','paper','可調難度的加減乘除算術紙本。'),
+ T('visual-exploration-paper','視覺搜尋可調式紙本生成器','paper','找出指定圖形的視覺搜尋紙本，難度可調。'),
+ T('window-lattice-generator','窗櫺紋紙本生成器','color','傳統窗櫺紋樣著色紙本。'),
+ T('hakka-floral-generator','大花布紙本生成器','color','客家大花布紋樣著色紙本。'),
+ T('taiwanese-windows','老鐵窗花生成器','color','老鐵窗花圖樣著色畫。'),
+ T('cement-tile-color','花磚著色畫生成器','color','復古花磚圖樣著色畫。'),
+ T('pop-art-coloring','圓點著色畫生成器','color','圓點藝術風格著色畫。'),
+ T('mandala-generator','曼陀羅著色畫生成器','color','自訂層數與圖樣的曼陀羅著色畫。'),
+ T('sticker-creation','標籤貼紙畫生成器','color','用圓點標籤貼紙貼出作品的底稿。'),
+ T('mandala-lessons','曼陀羅一圈一圈畫','craft','24 個曼陀羅教案，由中心一圈一圈動畫示範。'),
+ T('torn-paper-mosaic','撕貼畫馬賽克教學','craft','24 個撕貼畫教案，依編號貼滿，附 A4 底稿。'),
+ T('tangle-steps','纏繞畫步驟示範','craft','纏繞畫分步動畫與 A4 學習單。'),
+ T('fingerprint-swab-art','指紋棉花棒創作','craft','蓋指紋、棉花棒點畫，一步一步完成作品。'),
+ T('paper-cut-workshop','對摺剪紙工坊','craft','16 個對摺剪紙教案，印出來直接摺、直接剪。'),
+ T('poker-icebreakers','撲克牌破冰七種玩法','rec','7 種撲克牌破冰玩法，看動畫就會玩。'),
+ T('poker-database','撲克牌 70 種玩法資料庫','rec','70 種撲克牌玩法，文字說明加影片。'),
+ T('party-games','派對遊戲資料庫','rec','可搜尋、分類、隨機挑選的派對遊戲。'),
+ T('slide-game-video','簡報遊戲影片工坊','group','自製互動簡報遊戲，加音樂後轉成影片。'),
+ T('dual-task-slides','長者遊戲簡報生成器','group','雙重任務遊戲簡報，一邊動一邊想。'),
+ T('order-different-slides','規律接龍簡報遊戲生成器','group','找規律、接龍的簡報遊戲生成。'),
+ T('dementia-talk','失智溝通 29 情境教案','db','29 個失智照顧溝通情境的紙偶動畫教案。'),
+ T('dementia-activity-database','失智長輩活動資料庫','db','失智長輩也能參與的活動教案與影片，可收藏。'),
+ T('art-senior-database','長者手工藝教案資料庫','db','長者手工藝教案整理，可搜尋分類。'),
+ T('water-bottle','水瓶肌力訓練研究資料庫','rec','用水瓶當啞鈴的團體有氧與肌力運動。'),
+];
+const catIdx=c=>CATS.findIndex(x=>x.k===c);
+TOOLS.sort((a,b)=>catIdx(a.c)-catIdx(b.c));
+TOOLS.forEach((t,i)=>t.i=i+1);
+const toolCard=t=>`<div class="tool" data-cat="${t.c}"><div class="shot"><img src="shots/${t.s}.jpg" alt="${t.n} 畫面截圖" loading="lazy"></div><a href="https://mattsue1003.github.io/${t.s}/" target="_blank" rel="noopener"><div class="cap"><span>${pad2(t.i)}.</span><b>${t.n}</b></div><p>${t.d}</p><span class="open br">開啟 ↗</span></a></div>`;
+function pad2(n){return String(n).padStart(2,'0')}
+
+const libStart=S.length;
+add('工具庫總覽','lib',['sky','grid','cobalt','dice'],`
+<div class="eyebrow"><b>11 工具庫</b><span>47 個現成網頁，分 9 類</span></div>
+<div class="cathead"><h2>不用從零開始：47 個工具，按用途找</h2></div>
+<div class="catgrid">
+${CATS.map((c,k)=>`<button data-go="${libStart+1+k}" aria-label="前往 ${c.name}">${art(c.spec)}<div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span class="cap">${String.fromCharCode(65+k)}.　${TOOLS.filter(t=>t.c===c.k).length} 個工具</span><h3>${c.name}</h3><p>${c.dom}</p></div></button>`).join('')}
+</div>
+<p class="mono muted">完整清單可搜尋：上方 [ 工具庫 ] 或按 T</p>`);
+
+CATS.forEach((c,k)=>{
+  const list=TOOLS.filter(t=>t.c===c.k);
+  add(`工具 ${String.fromCharCode(65+k)} ${c.name}`,'tools',c.spec,`
+<div class="eyebrow"><b>工具庫 ${String.fromCharCode(65+k)}</b><span>${list.length} 個工具</span><span>${c.dom}</span></div>
+<div class="cathead"><h2>${c.name}</h2></div>
+<div class="tools">${list.map(toolCard).join('')}</div>
+<div class="tip"><span>帶領提醒</span><p>${c.tip}</p></div>`);
+});
+
+add('謝謝','end',['red','rays','pink','heart'],`
+<div class="cover">
+  <div style="display:flex;flex-direction:column;gap:26px;min-width:0">
+    <div class="eyebrow"><b>謝謝聆聽</b><span>Q &amp; A</span></div>
+    <p class="quote">每位長輩，<br>都是一本還沒畫完的書。</p>
+    <p class="body muted">AI 幫我們把它畫出來，我們負責好好聽完。</p>
+  </div>
+  <div class="collage">
+    ${tile('01','記憶',['red','rays','pink','photo'])}
+    ${tile('02','語言',['yellow','dots','orange','bubble'])}
+    ${tile('03','注意',['teal','ring','sky','eye'])}
+    ${tile('04','情緒',['pink','sun','red','heart'])}
+    ${tile('05','故事',['sky','sun','yellow','book'])}
+    ${tile('06','陪伴',['green','stripes','teal','people','#171717'])}
+  </div>
+</div>`);
+
+/* ---------- render ---------- */
+const deck=document.getElementById('deck'), N=S.length, pad=n=>String(n).padStart(2,'0');
+deck.innerHTML=S.map((s,i)=>`<article class="slide" data-i="${i}" aria-label="第 ${i+1} 頁：${s.title}"><div class="inner">${s.html}</div></article>`).join('');
+document.querySelector('.wallgrid').innerHTML=S.map((s,i)=>`<button data-go="${i}" aria-label="前往第 ${i+1} 頁 ${s.title}">${tile(pad(i+1),s.title,s.spec)}</button>`).join('');
+const KIND={cover:'封面',problem:'問題',shift:'觀念',quote:'理念',media:'工具',matrix:'對應',case:'案例',story:'延伸',flow:'流程',kit:'工具箱',ethics:'守則',eval:'紀錄',next:'行動',lib:'工具庫',tools:'工具庫',demo:'實作',end:'結語'};
+
+/* searchable library view */
+let libCat='all';
+const chipsEl=document.getElementById('chips'), qEl=document.getElementById('q'), outEl=document.getElementById('libout');
+chipsEl.innerHTML=`<button class="chipbtn" data-c="all" aria-pressed="true">全部<i>${TOOLS.length}</i></button>`+CATS.map(c=>`<button class="chipbtn" data-c="${c.k}" aria-pressed="false">${c.name}<i>${TOOLS.filter(t=>t.c===c.k).length}</i></button>`).join('');
+function renderLib(){
+  const q=qEl.value.trim().toLowerCase();
+  const hit=t=>(libCat==='all'||t.c===libCat)&&(!q||(t.n+t.d+t.s+CATS.find(c=>c.k===t.c).name).toLowerCase().includes(q));
+  const html=CATS.map((c,k)=>{const l=TOOLS.filter(t=>t.c===c.k&&hit(t));return l.length?`<section class="libsec"><div class="cathead"><h3><span class="sw" style="background:var(--${c.spec[0]})"></span>${String.fromCharCode(65+k)}. ${c.name}</h3><span class="mono muted">${c.dom}</span></div><div class="tools">${l.map(toolCard).join('')}</div></section>`:''}).join('');
+  outEl.innerHTML=html||`<p class="empty">找不到「${qEl.value.replace(/[<>&]/g,'')}」，換個關鍵字試試，例如：猜、著色、影片。</p>`;
+}
+chipsEl.onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;libCat=b.dataset.c;chipsEl.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));renderLib()};
+qEl.oninput=renderLib;
+renderLib();
+document.querySelector('.listing').innerHTML=S.map((s,i)=>`<button data-go="${i}"><span class="n">${pad(i+1)}.</span>${art(s.spec)}<span class="ttl">${s.title}</span><span class="kind">${KIND[s.kind]}</span></button>`).join('');
+
+let cur=0, view='deck';
+const slides=[...deck.children], countEl=document.getElementById('count');
+function show(i,push=true){
+  cur=Math.max(0,Math.min(N-1,i));
+  slides.forEach((el,k)=>el.classList.toggle('on',k===cur));
+  slides[cur].scrollTop=0;
+  countEl.innerHTML=`<u>${pad(cur+1)}</u><i>/</i>${pad(N)}`;
+  if(push) setHash('p'+(cur+1));
+}
+function setView(v,push=true){
+  view=v;
+  ['deck','wall','list','tools'].forEach(id=>document.getElementById(id).hidden=id!==v);
+  document.querySelectorAll('header nav button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===v));
+  document.getElementById('pager').style.visibility=v==='deck'?'visible':'hidden';
+  if(push) setHash(v==='deck'?'p'+(cur+1):v);
+}
+function setHash(h){try{history.replaceState(null,'','#'+h)}catch(e){location.hash=h}}
+function route(){
+  const h=location.hash.slice(1);
+  if(h==='wall'||h==='list'||h==='tools'){setView(h,false)}
+  else{const m=/^p(\d+)$/.exec(h); setView('deck',false); show(m?+m[1]-1:0,false)}
+}
+document.querySelectorAll('header nav button').forEach(b=>b.onclick=()=>setView(b.dataset.view));
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{show(+b.dataset.go);setView('deck')});
+document.getElementById('prev').onclick=()=>show(cur-1);
+document.getElementById('next').onclick=()=>show(cur+1);
+addEventListener('hashchange',route);
+addEventListener('keydown',e=>{
+  if(!document.getElementById('intro').hidden){if(['Enter','Escape',' '].includes(e.key))endIntro();return}
+  if(!zoomEl.hidden){if(['Escape','Enter',' '].includes(e.key)){e.preventDefault();closeZoom()}return}
+  if(!document.getElementById('about').hidden){if(e.key==='Escape')closeAbout();return}
+  if(e.target.closest('input,textarea'))return;
+  const k=e.key;
+  if(view==='deck'&&['ArrowRight','PageDown',' '].includes(k)){e.preventDefault();show(cur+1)}
+  else if(view==='deck'&&['ArrowLeft','PageUp'].includes(k)){e.preventDefault();show(cur-1)}
+  else if(view==='deck'&&k==='Home')show(0);
+  else if(view==='deck'&&k==='End')show(N-1);
+  else if(k==='g'||k==='G')setView(view==='wall'?'deck':'wall');
+  else if(k==='l'||k==='L')setView(view==='list'?'deck':'list');
+  else if(k==='t'||k==='T')setView(view==='tools'?'deck':'tools');
+  else if(k==='Escape'&&view!=='deck')setView('deck');
+});
+let tx=null,ty=null;
+deck.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+deck.addEventListener('touchend',e=>{if(tx===null)return;const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;
+  if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5)show(cur+(dx<0?1:-1));tx=null},{passive:true});
+
+/* ---------- zoom / spotlight ---------- */
+const zoomEl=document.getElementById('zoom'), zc=document.getElementById('zc'), selBtn=document.getElementById('selbtn');
+const ZSEL='img,.art,.quote,h1,h2,h3,.lead,.lyrics>div,.prompt,.tip,.compare>div,li,td,th,dt,dd,.chip,figcaption,.answer,p,.body';
+const NOZOOM='button,a,input,label,select,textarea,.cells,.thumbs,.catgrid,.libbar';
+function openZoom(node){zc.innerHTML='';zc.appendChild(node);zoomEl.hidden=false;selBtn.hidden=true}
+function closeZoom(){zoomEl.hidden=true;zc.innerHTML=''}
+function zoomText(text,isSel){const d=document.createElement('div');d.className='ztext'+(isSel?' sel':'');
+  if(isSel){const s=document.createElement('span');s.textContent=text;d.appendChild(s)}else d.textContent=text;openZoom(d)}
+function zoomEl_(el){
+  if(el.tagName==='IMG'){const i=new Image();i.src=el.currentSrc||el.src;i.alt=el.alt;openZoom(i);return}
+  if(el.classList.contains('art')){const w=document.createElement('div');w.className='zsvg';w.innerHTML=el.innerHTML;openZoom(w);return}
+  if(el.tagName==='TD'||el.tagName==='TH'){const tr=el.closest('tr'),tb=el.closest('table');const t=document.createElement('table');
+    if(tb.tHead)t.appendChild(tb.tHead.cloneNode(true));const b=document.createElement('tbody');b.appendChild(tr.cloneNode(true));t.appendChild(b);openZoom(t);return}
+  const c=el.cloneNode(true);c.querySelectorAll('.lbl,button').forEach(x=>x.remove());
+  zoomText(c.innerText.replace(/\n{3,}/g,'\n\n').trim(),false);
+}
+document.addEventListener('click',e=>{
+  if(e.target===selBtn)return;
+  if(!zoomEl.hidden){closeZoom();return}
+  const scope=e.target.closest('#deck .slide.on,#tools .shot');if(!scope)return;
+  if(String(getSelection()).trim())return;
+  if(e.target.closest(NOZOOM)&&!e.target.closest('.shot'))return;
+  const el=e.target.closest(ZSEL);if(!el||!scope.contains(el)&&!el.closest('.shot'))return;
+  if(!el.innerText?.trim()&&el.tagName!=='IMG'&&!el.classList.contains('art'))return;
+  zoomEl_(el);
+});
+let selTimer;
+document.addEventListener('selectionchange',()=>{clearTimeout(selTimer);selTimer=setTimeout(()=>{
+  const s=getSelection(),t=String(s).trim();
+  if(!t||t.length>300||!s.rangeCount||!s.anchorNode||!(s.anchorNode.parentElement?.closest('#deck,#tools'))){selBtn.hidden=true;return}
+  const r=s.getRangeAt(0).getBoundingClientRect();
+  selBtn.hidden=false;const bw=selBtn.offsetWidth;
+  selBtn.style.left=Math.max(12,Math.min(innerWidth-bw-12,r.left+r.width/2-bw/2))+'px';
+  selBtn.style.top=Math.min(innerHeight-48,r.bottom+10)+'px';
+},180)});
+selBtn.addEventListener('mousedown',e=>e.preventDefault());
+selBtn.addEventListener('click',()=>{const t=String(getSelection()).trim();if(t){zoomText(t,true);getSelection().removeAllRanges()}});
+
+/* ---------- demo interactions ---------- */
+let rvQ=0;
+function rvBuild(){const cells=document.getElementById('cells');if(!cells)return;
+  const pal=['red','yellow','teal','cobalt','pink','orange','lilac','sky','green','sand'];
+  cells.innerHTML=Array.from({length:20},(_,i)=>`<button aria-label="翻開第 ${i+1} 格" data-act="rv-cell" style="background:var(--${pal[(i*7+rvQ*3)%pal.length]})">${i+1}</button>`).join('');
+  document.getElementById('revealImg').src=`howto/${GUESS[rvQ][0]}.jpg`;
+  document.getElementById('rvAnswer').textContent='';rvCount()}
+function rvCount(){const left=document.querySelectorAll('#cells button:not(.off)').length;document.getElementById('rvCount').textContent=`還有 ${left} 格`;
+  if(!left)document.getElementById('rvAnswer').textContent=`答案：${GUESS[rvQ][1]}`}
+function bookGo(n){n=(n+BOOK.length)%BOOK.length;bookN=n;document.getElementById('bookImg').src=`howto/c5-p${n+1}.jpg`;document.getElementById('bookImg').alt=`繪本第 ${n+1} 頁插畫`;
+  document.getElementById('bookNo').textContent=`第 ${n+1} / ${BOOK.length} 頁`;document.getElementById('bookTtl').textContent=BOOK[n][0];document.getElementById('bookLine').textContent=BOOK[n][1];
+  document.querySelectorAll('.thumbs button').forEach((b,i)=>b.setAttribute('aria-current',i===n))}
+let bookN=0;
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;
+  if(a==='rv-cell'){b.classList.add('off');rvCount()}
+  else if(a==='rv-one'){const c=[...document.querySelectorAll('#cells button:not(.off)')];if(c.length){c[Math.floor(Math.random()*c.length)].classList.add('off');rvCount()}}
+  else if(a==='rv-all'){document.querySelectorAll('#cells button').forEach(x=>x.classList.add('off'));rvCount()}
+  else if(a==='rv-next'){rvQ=(rvQ+1)%GUESS.length;rvBuild()}
+  else if(a==='bk-prev')bookGo(bookN-1);
+  else if(a==='bk-next')bookGo(bookN+1);
+  else if(a==='bk-go')bookGo(+b.dataset.n);
+  else if(a==='copy'){const src=document.getElementById(b.dataset.src);try{await navigator.clipboard.writeText(src.innerText.trim());b.textContent='已複製'}
+    catch(err){const r=document.createRange();r.selectNodeContents(src);const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='已選取，請按複製'}
+    setTimeout(()=>b.textContent='複製提示詞',2000)}
+});
+rvBuild();
+
+/* copy prompt */
+document.getElementById('copyBtn').onclick=async function(){
+  const t=document.getElementById('promptText').innerText.replace('插畫提示詞','').trim();
+  try{await navigator.clipboard.writeText(t);this.textContent='已複製'}
+  catch(e){const r=document.createRange();r.selectNodeContents(document.getElementById('promptText'));const s=getSelection();s.removeAllRanges();s.addRange(r);this.textContent='已選取，請按複製'}
+  setTimeout(()=>this.textContent='複製提示詞',2000);
+};
+
+/* about */
+const about=document.getElementById('about');
+document.getElementById('aboutBtn').onclick=()=>{about.hidden=false;document.getElementById('aboutClose').focus()};
+function closeAbout(){about.hidden=true}
+document.getElementById('aboutClose').onclick=closeAbout;
+
+/* intro typewriter */
+const intro=document.getElementById('intro'), typer=document.getElementById('typer');
+const INTRO='在失智據點裡，每週都有一堂認知促進活動。\n著色、拼圖、學習單，長輩安靜地完成，然後下課。\n\n如果長輩說出的那段年輕時光，\n可以當場變成一張畫、一首歌呢？';
+let timer=null;
+function endIntro(){clearTimeout(timer);intro.hidden=true;try{sessionStorage.setItem('introSeen','1')}catch(e){}}
+document.getElementById('skip').onclick=endIntro;
+route();
+let seen=false;try{seen=sessionStorage.getItem('introSeen')==='1'}catch(e){}
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(!seen && !location.hash){
+  intro.hidden=false;
+  if(reduce){typer.textContent=INTRO;timer=setTimeout(endIntro,5000)}
+  else{let k=0;(function step(){typer.textContent=INTRO.slice(0,++k);timer=setTimeout(k<INTRO.length?step:()=>{timer=setTimeout(endIntro,1800)},INTRO[k-1]==='\n'?380:70)})()}
+}
+</script>
+
+</body>
+</html>
