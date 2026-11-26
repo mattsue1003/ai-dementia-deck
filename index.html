@@ -184,6 +184,8 @@ dl.kit dd{margin:0}
 /* hands-on demo slides */
 .steps-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px 22px}
 .steps-grid.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.steps-grid.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.steps-grid.g4 .step img{aspect-ratio:2/1}
 .step{margin:0;display:flex;flex-direction:column;gap:8px;min-width:0}
 .step img{width:100%;max-width:100%;aspect-ratio:16/10;object-fit:contain;background:var(--soft);border:1px solid var(--line);display:block}
 .step figcaption{display:grid;grid-template-columns:2.4em minmax(0,1fr);font-size:clamp(.9rem,1.1vw,1rem);line-height:1.5}
@@ -207,6 +209,15 @@ dl.kit dd{margin:0}
 .reveal .cells{position:absolute;inset:0;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(4,1fr)}
 .reveal .cells button{border:1px solid rgba(255,255,255,.35);transition:opacity .35s ease;font-family:var(--mono);font-size:.8rem;color:rgba(23,23,23,.55)}
 .reveal .cells button.off{opacity:0;pointer-events:none}
+.advice{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;flex:1;min-height:0}
+.advice>div{border-top:2px solid var(--fg);background:var(--soft);padding:22px 24px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.advice .k{font-family:var(--mono);font-size:.75rem;letter-spacing:.06em;color:var(--muted)}
+.advice h3{margin:0;font-size:clamp(1.3rem,2.4vw,2rem)}
+.advice ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:12px;font-size:clamp(1rem,1.55vw,1.3rem)}
+.advice p{margin:0;font-size:clamp(.92rem,1.15vw,1.02rem)}
+.advice .warn{margin-top:auto;font-size:.88rem;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+.golink{display:inline-flex;align-items:center;gap:10px;font-weight:700;font-size:clamp(1.05rem,1.6vw,1.3rem);padding:12px 22px;background:var(--hi);color:var(--hi-fg);text-decoration:none;align-self:flex-start}
+.golink:hover{opacity:.88}
 .ctrl{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;font-family:var(--mono);font-size:.875rem}
 .answer{font-size:clamp(1.2rem,2vw,1.6rem);font-weight:500;min-height:1.6em}
 .book{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:clamp(20px,4vw,52px);align-items:center}
@@ -279,11 +290,13 @@ dl.kit dd{margin:0}
   .wall-mini{grid-template-columns:repeat(4,minmax(0,1fr))}
   .tools{grid-template-columns:repeat(3,minmax(0,1fr))}
   .catgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .steps-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .steps-grid,.steps-grid.g4{grid-template-columns:repeat(2,minmax(0,1fr))}
   .book{grid-template-columns:minmax(0,1fr)}
 }
 @media (max-width:720px){
   :root{--head:96px}
+  .advice{grid-template-columns:minmax(0,1fr)}
+  .steps-grid.g4{grid-template-columns:minmax(0,1fr)}
   header{grid-template-columns:1fr auto;grid-template-rows:auto auto;padding-top:calc(10px + env(safe-area-inset-top,0px));align-content:center;row-gap:8px}
   header nav{grid-column:1 / -1;grid-row:2;gap:12px;font-size:.8rem}
   .cover,.case,.cols{grid-template-columns:minmax(0,1fr)}
@@ -475,7 +488,7 @@ add('五種 AI 媒介','media',['cobalt','grid','lilac','film','#171717'],`
 <h2>五種 AI 媒介，各自喚起不同感官</h2>
 <div class="stagger">
   ${tile('01','圖像生成',['red','rays','pink','brush'],'<h3>口述變插畫</h3><p class="muted">把回憶畫成看得見的畫面。<br>ChatGPT、Gemini、Canva</p>')}
-  ${tile('02','歌曲生成',['yellow','dots','orange','note'],'<h3>故事變歌曲</h3><p class="muted">台語、國語老歌風都能做。<br>Suno 等音樂生成工具</p>')}
+  ${tile('02','歌曲生成',['yellow','dots','orange','note'],'<h3>故事變歌曲</h3><p class="muted">台語、國語老歌風都能做。<br>Gemini 創作音樂、Suno</p>')}
   ${tile('03','語音對話',['teal','ring','sky','radio'],'<h3>開口就能聊</h3><p class="muted">手機語音模式，不用打字。<br>ChatGPT、Gemini 語音</p>')}
   ${tile('04','動態影像',['lilac','stripes','cobalt','film'],'<h3>照片動起來</h3><p class="muted">老照片轉短片、做成回憶影片。<br>影片生成、剪映範本</p>')}
   ${tile('05','互動網頁',['green','grid','teal','dice','#171717'],'<h3>客製小遊戲</h3><p class="muted">用 AI 寫出投影用的猜謎、配對。<br>Claude、ChatGPT</p>')}
@@ -520,7 +533,8 @@ const BOOK=[
  ['市場的歲月','佇北港菜市仔賣菜，一賣就是三十年。'],
  ['現在的快樂','這馬逐禮拜來據點唱歌，心情真快活。'],
 ];
-const GUESS=[['c3-img1','大同電鍋'],['c3-img2','腳踩式縫紉機']];
+const GUESS=['大同電鍋','腳踩式縫紉機','木殼黑白電視','轉盤撥號電話','真空管收音機','煤油燈','木炭熨斗','竹編菜罩','洗衣板','鋁製便當盒',
+ '紅花熱水瓶','彈珠汽水','柑仔店糖果罐','手壓式抽水機','老式鐵馬','紅龜粿模','卡式錄音機','藍白拖','尪仔標','雞毛撢子'].map((a,i)=>[`g${String(i+1).padStart(2,'0')}`,a]);
 
 add('案例 01 懷舊插畫','case',['red','rays','pink','photo'],caseSlide('01','一張畫，回到那一年',['red','rays','pink','photo'],
  ['圖像生成','40 分鐘','6–10 人','投影機＋筆電'],
@@ -548,6 +562,31 @@ ${demoHead('01','長輩一句「不對」，畫面就更像她的記憶','成品
 </div>
 <div class="chips"><span class="chip">斗笠 → 紅色花布頭巾</span><span class="chip">黃狗 → 黑色土狗</span><span class="chip">＋ 背景稻草堆</span></div>`);
 
+add('實作 01 輔助建議','demo',['red','rays','pink','photo'],`
+${demoHead('01','輔助建議：換工具也行，畫錯也能局部修','ChatGPT・Canva 魔法圖層')}
+<div class="advice">
+  <div>
+    <span class="k">建議 A　換一個生圖工具</span>
+    <h3>ChatGPT 也能畫，提示詞照用</h3>
+    <ol>
+      <li>同一段提示詞（年代、地點、人物、動作、細節）直接貼進 ChatGPT</li>
+      <li>要改的時候一樣用「請根據上一張圖修改：A 換成 B」</li>
+      <li>兩邊各畫一張，請長輩挑「比較像」的那張</li>
+    </ol>
+    <p class="warn">Gemini、ChatGPT 都有每日生圖次數上限，課前先備好 2–3 張，現場只做修改。</p>
+  </div>
+  <div>
+    <span class="k">建議 B　只想改一小塊</span>
+    <h3>Canva 魔法圖層，拆開來拖拉修正</h3>
+    <ol>
+      <li>把 AI 圖片（JPG 或 PNG）上傳到 Canva，點圖片 →「編輯」→「魔法圖層」</li>
+      <li>等它把畫面拆成一層一層：人物、狗、稻草堆各自分開</li>
+      <li>直接拖曳、放大縮小、刪掉不要的東西，不用整張重畫</li>
+    </ol>
+    <p class="warn">插畫、水彩這類風格拆得最清楚，寫實照片效果較差。會用到 Canva 每月 AI 額度，用完要等下個月重置。</p>
+  </div>
+</div>`);
+
 add('案例 02 專屬歌曲','case',['yellow','dots','orange','note'],caseSlide('02','為你寫一首歌',['yellow','dots','orange','note'],
  ['歌曲生成','50 分鐘','全班','藍牙喇叭'],
  ['收集關鍵字：家鄉地名、做過的工作、最愛吃的菜','大家一起把關鍵字串成四句歌詞，寫在白板上','選曲風：台語老歌、日式演歌、校園民歌','AI 生成歌曲後，全班跟著打拍子合唱','把歌和歌詞存進長輩的作品資料夾'],
@@ -555,18 +594,27 @@ add('案例 02 專屬歌曲','case',['yellow','dots','orange','note'],caseSlide(
  '曲風選長輩年輕時熟悉的年代。副歌放進長輩的名字，第一次聽到時的表情，就是這堂課的成果。','音樂與語言'));
 
 add('實作 02 操作步驟','demo',['yellow','dots','orange','note'],`
-${demoHead('02','Gemini 寫詞，Suno 譜曲','Gemini＋Suno・約 5 分鐘')}
+${demoHead('02','Gemini 寫詞，再交給音樂工具譜曲','Gemini＋Suno・約 5 分鐘')}
 <div class="steps-grid">
   ${step('01','c2-1','在 Gemini 輸入關鍵字：家鄉、工作、最愛的菜、名字，指定台語老歌風格')}
   ${step('02','c2-2','Gemini 寫出主歌與副歌，副歌唱到「清水伯」')}
-  ${step('03','c2-3','請 Gemini 唱出來，它做不到，要換成音樂生成工具')}
-  ${step('04','c2-4','打開 Suno，切到 Advanced，把歌詞貼進 Lyrics')}
+  ${step('03','c2-3','在一般對話直接叫 Gemini 唱，它做不到；要按「＋」改用「創作音樂」（下一頁），或換 Suno')}
+  ${step('04','c2-4','另一個選擇：打開 Suno，切到 Advanced，把歌詞貼進 Lyrics')}
   ${step('05','c2-5','在 Styles 填曲風：台語老歌、慢板、吉他、手風琴、溫暖男聲')}
   ${step('06','c2-6','按 Create，不到一分鐘產生多個版本，挑一首播放')}
 </div>`);
 
+add('實作 02 Gemini 創作音樂','demo',['yellow','dots','orange','note'],`
+${demoHead('02','不用換工具：Gemini 按「＋」就能作曲','Gemini 創作音樂・約 1 分鐘')}
+<div class="steps-grid g4">
+  ${step('01','c2-g1','在輸入框左邊按「＋」，往下選「創作音樂」')}
+  ${step('02','c2-g2','輸入框變成「描述要創作的音樂」，下面可選長度、人聲、類型')}
+  ${step('03','c2-g3','長度選「標準」、人聲選「人聲」，貼上曲風和剛才寫好的歌詞')}
+  ${step('04','c2-g4','約 1 分鐘，做出 3 分鐘的〈故鄉的菜脯蛋〉，按播放就能全班一起聽')}
+</div>`);
+
 add('實作 02 成品','demo',['yellow','dots','orange','note'],`
-${demoHead('02','〈故鄉雲林的甘蔗香〉','成品・Suno 生成')}
+${demoHead('02','〈故鄉雲林的甘蔗香〉','成品・同一份歌詞，Gemini 與 Suno 都能唱')}
 <div class="lyrics">
   <div><span>主歌</span>雲林故鄉日頭赤炎炎<br>少年糖廠打拚流汗衫<br>阿母灶腳炒的菜脯蛋<br>古早滋味永遠記心肝</div>
   <div><span>副歌</span>人講我是快樂清水伯<br>蔗埕風吹想起彼當初<br>一生勤儉平安就是福<br>歡喜唱歌大家來照顧</div>
@@ -588,9 +636,11 @@ ${demoHead('03','先用 AI 備好題目，再一格一格翻開','Gemini 生圖�
     ${step('02','c3-2','接著說「再畫一張，同樣風格：腳踩式縫紉機」，一次備好整組題目')}
   </div>
   <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
-    <div class="reveal" id="reveal"><img id="revealImg" src="howto/c3-img1.jpg" alt="猜謎題目圖片"><div class="cells" id="cells"></div></div>
+    <div class="reveal" id="reveal"><img id="revealImg" src="guess/g01.jpg" alt="猜謎題目圖片"><div class="cells" id="cells"></div></div>
     <div class="ctrl"><button class="br" data-act="rv-one">翻一格</button><button class="br" data-act="rv-all">全部揭曉</button><button class="br" data-act="rv-next">下一題</button><span class="muted" id="rvCount"></span></div>
     <p class="answer" id="rvAnswer" aria-live="polite"></p>
+    <a class="golink" href="guess.html" target="_blank" rel="noopener">開大畫面跟長輩玩 ↗</a>
+    <span class="muted mono" style="font-size:.8rem">20 題懷舊物品・老師可上傳自己的圖片</span>
   </div>
 </div>`);
 
@@ -601,7 +651,7 @@ add('案例 04 時光機電台','case',['teal','ring','sky','radio'],caseSlide('
  '語音模式請調慢語速、放大音量。AI 聽不清楚時由帶領者複述，別讓長輩因為「機器聽不懂」而洩氣。','語音互動'));
 
 add('實作 04 操作步驟','demo',['teal','ring','sky','radio'],`
-${demoHead('04','讓 AI 變成「阿秀姐」電台主持人','Gemini 角色扮演・約 2 分鐘')}
+${demoHead('04','讓 AI 變成「阿秀姐」電台主持人','Gemini App 角色扮演・約 2 分鐘')}
 <div class="steps-grid g2">
   ${step('01','c4-1','貼上角色設定：身分、開場要報日期節氣、每次只說 3–4 句、call in 時要追問')}
   ${step('02','c4-2','阿秀姐開場：報出 11 月 26 日、剛過「小雪」，請大家看日曆確認')}
@@ -610,6 +660,17 @@ ${demoHead('04','讓 AI 變成「阿秀姐」電台主持人','Gemini 角色扮�
     <p class="prompt" id="radioPrompt" style="font-size:.85rem">請你扮演 1960 年代台灣廣播電台的主持人「阿秀姐」，主持給長輩聽的點歌節目。規則：1. 先報今天的日期、季節和節氣，請聽眾一起確認。2. 每次只說 3 到 4 句，用簡單國語夾一點台語。3. 聽眾 call in 時，先問他叫什麼、住哪裡，再追問一個當年的細節。現在請開場。</p>
     <button class="br mono" data-act="copy" data-src="radioPrompt" style="align-self:flex-start">複製提示詞</button>
   </div>
+</div>`);
+
+add('實作 04 Google AI Studio','demo',['teal','ring','sky','radio'],`
+${demoHead('04','建議做法：在 Google AI Studio 固定角色，再變成聲音','Google AI Studio・約 3 分鐘')}
+<div class="steps-grid">
+  ${step('01','c4-s1','右側「System instructions」新增一則「阿秀姐電台」，貼上角色設定；之後每次開新對話都能直接選')}
+  ${step('02','c4-s2','只要說「今天是 11 月 26 日，現在請開場」，阿秀姐就報日期、節氣，請大家看日曆')}
+  ${step('03','c4-s3','把長輩的 call in 打進去，阿秀姐會問住哪裡，再追問「第一次聽到〈望春風〉是在哪裡」')}
+  ${step('04','c4-s4','要讓阿秀姐開口：模型選「Audio」裡的 TTS，進到「Turn text into natural-sounding speech」')}
+  ${step('05','c4-s5','聲音選溫暖的女聲，Style 寫「1960 年代收音機女主持人、台灣口音、語速放慢」，貼上台詞按 Run')}
+  ${note('實作心得','角色設定放在 System instructions，比每次貼提示詞穩定，阿秀姐不會講到一半變回一般 AI。我們用的帳號跑到第 05 步時，跳出「Quota limit reached」，免費額度用完了；正式上課前先試跑，把聲音存好，或改由帶領者自己唸台詞。')}
 </div>`);
 
 add('案例 05 生命故事繪本','case',['sky','sun','yellow','book'],caseSlide('05','我的生命故事繪本',['sky','sun','yellow','book'],
@@ -684,8 +745,8 @@ add('帶領者工具箱','kit',['sand','grid','orange','brush'],`
     <h2>帶領者工具箱</h2>
     <dl class="kit">
       <div><dt>對話與提示</dt><dd>ChatGPT、Gemini、Claude</dd></div>
-      <div><dt>插畫生成</dt><dd>ChatGPT 生圖、Gemini、Canva AI</dd></div>
-      <div><dt>歌曲生成</dt><dd>Suno 等音樂生成工具</dd></div>
+      <div><dt>插畫生成</dt><dd>ChatGPT 生圖、Gemini、Canva AI；局部修改用 Canva 魔法圖層</dd></div>
+      <div><dt>歌曲生成</dt><dd>Gemini「創作音樂」、Suno</dd></div>
       <div><dt>語音互動</dt><dd>手機 App 的語音對話模式</dd></div>
       <div><dt>硬體</dt><dd>筆電、投影機、藍牙喇叭、相印機</dd></div>
       <div><dt>文件</dt><dd>肖像與作品使用同意書、作品資料夾</dd></div>
@@ -959,7 +1020,7 @@ let rvQ=0;
 function rvBuild(){const cells=document.getElementById('cells');if(!cells)return;
   const pal=['red','yellow','teal','cobalt','pink','orange','lilac','sky','green','sand'];
   cells.innerHTML=Array.from({length:20},(_,i)=>`<button aria-label="翻開第 ${i+1} 格" data-act="rv-cell" style="background:var(--${pal[(i*7+rvQ*3)%pal.length]})">${i+1}</button>`).join('');
-  document.getElementById('revealImg').src=`howto/${GUESS[rvQ][0]}.jpg`;
+  document.getElementById('revealImg').src=`guess/${GUESS[rvQ][0]}.jpg`;
   document.getElementById('rvAnswer').textContent='';rvCount()}
 function rvCount(){const left=document.querySelectorAll('#cells button:not(.off)').length;document.getElementById('rvCount').textContent=`還有 ${left} 格`;
   if(!left)document.getElementById('rvAnswer').textContent=`答案：${GUESS[rvQ][1]}`}

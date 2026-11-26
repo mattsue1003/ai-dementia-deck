@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI 畫什麼 猜猜看</title>
+<meta name="description" content="一格一格翻開懷舊物品圖，讓長輩猜猜看。內建 20 題，也能上傳自己的圖片。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#FAFAFA; --fg:#171717; --muted:#6B6B6B; --line:#E2E2E2; --soft:#F0F0EE; --hi:#171717; --hi-fg:#FAFAFA; --veil:rgba(250,250,250,.96);
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --red:#E8412C; --pink:#F3A6B8; --teal:#1E9E86; --cobalt:#3C3FD8; --yellow:#F4C531;
+  --sky:#9FD0E6; --orange:#F07A2A; --green:#2F7D4F; --lilac:#B9A6E8; --sand:#E9DCC4;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#141414;--fg:#ECECEA;--muted:#9A9A98;--line:#2C2C2C;--soft:#1F1F1F;--hi:#ECECEA;--hi-fg:#141414;--veil:rgba(20,20,20,.96);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141414;--fg:#ECECEA;--muted:#9A9A98;--line:#2C2C2C;--soft:#1F1F1F;--hi:#ECECEA;--hi-fg:#141414;--veil:rgba(20,20,20,.96);color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:16px;line-height:1.5;
+  display:flex;flex-direction:column;overflow:hidden;
+  padding:env(safe-area-inset-top,0px) max(16px,env(safe-area-inset-right,0px)) env(safe-area-inset-bottom,0px) max(16px,env(safe-area-inset-left,0px))}
+button,input,select{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer;padding:0}
+:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
+.mono{font-family:var(--mono);letter-spacing:.04em}
+.br::before{content:"[ ";color:var(--muted)} .br::after{content:" ]";color:var(--muted)}
+.muted{color:var(--muted)}
+a{color:inherit}
+
+header{display:flex;align-items:center;gap:12px 22px;flex-wrap:wrap;padding:14px 8px 10px;font-family:var(--mono);font-size:.9rem;flex:none}
+header .ttl{font-family:var(--sans);font-weight:700;font-size:1.05rem;margin-right:auto;white-space:nowrap}
+header .ttl small{font-family:var(--mono);font-weight:400;color:var(--muted);font-size:.8rem;margin-left:10px}
+header nav{display:flex;gap:6px 18px;flex-wrap:wrap}
+header a{text-decoration:none}
+header a:hover,header button:hover{text-decoration:underline;text-underline-offset:4px}
+
+main{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:4px 0 10px}
+.stage{position:relative;overflow:hidden;border:1px solid var(--fg);background:var(--soft);
+  width:min(100%, calc((100dvh - 210px) * var(--ar,1.79)));aspect-ratio:var(--ar,1.79);max-height:calc(100dvh - 210px)}
+.stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;user-select:none;-webkit-user-drag:none}
+.cells{position:absolute;inset:0;display:grid}
+.cells button{border:1px solid rgba(255,255,255,.4);transition:opacity .45s ease,transform .45s ease;font-family:var(--mono);
+  font-size:clamp(1rem,2.6vw,2rem);font-weight:500;color:rgba(23,23,23,.6)}
+.cells button:hover{filter:brightness(1.06)}
+.cells button.off{opacity:0;transform:scale(.92);pointer-events:none}
+.answer{position:absolute;left:0;right:0;bottom:0;padding:clamp(10px,2vh,22px) 20px;background:var(--veil);color:var(--fg);
+  text-align:center;font-weight:700;font-size:clamp(1.6rem,5vw,3.4rem);letter-spacing:.06em;transform:translateY(105%);transition:transform .45s ease}
+.answer.show{transform:none}
+.answer small{display:block;font-family:var(--mono);font-weight:400;font-size:.8rem;color:var(--muted);letter-spacing:.08em}
+
+.ctrl{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px 14px;flex:none;width:100%}
+.big{font-family:var(--sans);font-weight:700;font-size:clamp(1.05rem,1.8vw,1.35rem);padding:12px 22px;border:1px solid var(--fg);min-height:52px}
+.big:hover{background:var(--soft)}
+.big.pri{background:var(--hi);color:var(--hi-fg)}
+.big.pri:hover{opacity:.88}
+.info{display:flex;gap:6px 20px;flex-wrap:wrap;justify-content:center;font-family:var(--mono);font-size:.85rem;color:var(--muted)}
+.info select{background:var(--bg);border:1px solid var(--line);padding:2px 6px}
+.info label{display:inline-flex;gap:6px;align-items:center}
+
+/* library panel */
+dialog{border:1px solid var(--fg);background:var(--bg);color:var(--fg);padding:0;width:min(1100px,calc(100vw - 32px));max-height:calc(100dvh - 48px)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+.pane{display:flex;flex-direction:column;max-height:calc(100dvh - 50px)}
+.pane .top{display:flex;align-items:center;gap:10px 20px;flex-wrap:wrap;padding:16px 20px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:.875rem}
+.pane .top h2{font-family:var(--sans);font-size:1.15rem;margin:0 auto 0 0}
+.pane .body{overflow:auto;padding:18px 20px 22px;display:flex;flex-direction:column;gap:18px}
+.drop{border:1.5px dashed var(--muted);padding:22px;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center}
+.drop.over{border-color:var(--fg);background:var(--soft)}
+.drop p{margin:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}
+.card{border:1px solid var(--line);display:flex;flex-direction:column;min-width:0}
+.card.offq{opacity:.45}
+.card .th{position:relative;aspect-ratio:16/10;background:var(--soft);overflow:hidden}
+.card .th img{width:100%;height:100%;object-fit:cover;display:block}
+.card .th .no{position:absolute;left:6px;top:6px;background:var(--veil);font-family:var(--mono);font-size:.75rem;padding:0 6px}
+.card .th .mine{position:absolute;right:6px;top:6px;background:var(--yellow);color:#171717;font-size:.72rem;padding:0 6px}
+.card .meta{padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+.card input[type=text]{width:100%;border:1px solid var(--line);background:var(--bg);padding:4px 6px;font-size:.95rem}
+.card .row{display:flex;justify-content:space-between;align-items:center;gap:8px;font-family:var(--mono);font-size:.78rem}
+.card .row label{display:inline-flex;gap:6px;align-items:center;cursor:pointer}
+.note{font-size:.85rem;color:var(--muted);margin:0}
+.help{font-family:var(--mono);font-size:.8rem;color:var(--muted);text-align:center}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--hi);color:var(--hi-fg);padding:10px 18px;font-size:.95rem;opacity:0;transition:opacity .3s;pointer-events:none;z-index:50}
+.toast.on{opacity:1}
+@media (max-width:640px){
+  .stage{width:100%;max-height:none}
+  .big{padding:10px 14px;min-height:46px}
+  header .ttl small{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="ttl">AI 畫什麼？猜猜看<small id="qno"></small></div>
+  <nav>
+    <button class="br" id="openLib">題庫與上傳</button>
+    <button class="br" id="fsBtn">全螢幕</button>
+    <a class="br" href="./#p16">回簡報</a>
+  </nav>
+</header>
+
+<main>
+  <div class="stage" id="stage">
+    <img id="pic" alt="猜謎題目圖片">
+    <div class="cells" id="cells"></div>
+    <div class="answer" id="answer" aria-live="polite"></div>
+  </div>
+  <div class="ctrl">
+    <button class="big" id="prevBtn">← 上一題</button>
+    <button class="big pri" id="oneBtn">翻一格</button>
+    <button class="big" id="allBtn">全部揭曉</button>
+    <button class="big" id="ansBtn">看答案</button>
+    <button class="big" id="nextBtn">下一題 →</button>
+  </div>
+  <div class="info">
+    <span id="left"></span>
+    <label>格數 <select id="gridSel">
+      <option value="2x3">6 格（簡單）</option>
+      <option value="3x4">12 格</option>
+      <option value="4x5" selected>20 格</option>
+      <option value="5x6">30 格（難）</option>
+    </select></label>
+    <span class="help">空白鍵 翻一格 · Enter 全部揭曉 · A 看答案 · ← → 換題</span>
+  </div>
+</main>
+
+<dialog id="lib" aria-labelledby="libTitle">
+  <div class="pane">
+    <div class="top">
+      <h2 id="libTitle">題庫與上傳</h2>
+      <button class="br" data-mode="all">全部都玩</button>
+      <button class="br" data-mode="mine">只玩我的圖片</button>
+      <button class="br" id="shuffleBtn">隨機排序</button>
+      <button class="br" id="closeLib">關閉</button>
+    </div>
+    <div class="body">
+      <label class="drop" id="drop">
+        <p><b>上傳自己的圖片</b>　點這裡選檔案，或把圖片拖進來（可一次選很多張）</p>
+        <p class="note">檔名會先當答案，上傳後可在下面修改。圖片只存在這台電腦的瀏覽器裡，不會上傳到網路；換電腦要重新上傳。</p>
+        <input type="file" id="file" accept="image/*" multiple hidden>
+      </label>
+      <div class="grid" id="grid"></div>
+    </div>
+  </div>
+</dialog>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const BUILTIN=[
+ ['大同電鍋'],['腳踩式縫紉機'],['木殼黑白電視'],['轉盤撥號電話'],['真空管收音機'],
+ ['煤油燈'],['木炭熨斗'],['竹編菜罩'],['洗衣板'],['鋁製便當盒'],
+ ['紅花熱水瓶'],['彈珠汽水'],['柑仔店糖果罐'],['手壓式抽水機'],['老式鐵馬'],
+ ['紅龜粿模'],['卡式錄音機'],['藍白拖'],['尪仔標'],['雞毛撢子']
+].map((a,i)=>({id:'b'+(i+1),answer:a[0],src:`guess/g${String(i+1).padStart(2,'0')}.jpg`,mine:false}));
+const PAL=['red','yellow','teal','cobalt','pink','orange','lilac','sky','green','sand'];
+const $=id=>document.getElementById(id);
+
+/* ---- per-viewer storage: uploaded images in IndexedDB, settings in localStorage (both optional) ---- */
+let db=null, mine=[];
+function idb(){return new Promise(res=>{try{const r=indexedDB.open('guess-game',1);
+  r.onupgradeneeded=()=>r.result.createObjectStore('img',{keyPath:'id'});
+  r.onsuccess=()=>res(r.result);r.onerror=()=>res(null)}catch(e){res(null)}})}
+function tx(mode){return db.transaction('img',mode).objectStore('img')}
+function dbAll(){return new Promise(res=>{if(!db)return res([]);try{const r=tx('readonly').getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>res([])}catch(e){res([])}})}
+function dbPut(o){return new Promise(res=>{if(!db)return res(false);try{const r=tx('readwrite').put(o);r.onsuccess=()=>res(true);r.onerror=()=>res(false)}catch(e){res(false)}})}
+function dbDel(id){return new Promise(res=>{if(!db)return res();try{const r=tx('readwrite').delete(id);r.onsuccess=r.onerror=()=>res()}catch(e){res()}})}
+const ls={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+let off=new Set(ls.get('guess.off',[]));   // ids excluded from play
+let order=ls.get('guess.order',null);       // custom play order
+let grid=ls.get('guess.grid','4x5');
+let list=[], q=0;
+
+function allItems(){return [...BUILTIN,...mine]}
+function rebuildList(keepId){
+  let items=allItems();
+  if(order){const pos=new Map(order.map((id,i)=>[id,i]));items.sort((a,b)=>(pos.has(a.id)?pos.get(a.id):1e6)-(pos.has(b.id)?pos.get(b.id):1e6))}
+  list=items.filter(it=>!off.has(it.id));
+  if(!list.length)list=items;
+  const k=keepId?list.findIndex(it=>it.id===keepId):-1;
+  q=k>=0?k:Math.min(q,list.length-1);
+}
+
+/* ---- game ---- */
+function build(){
+  const it=list[q];if(!it)return;
+  const [r,c]=grid.split('x').map(Number);
+  const cells=$('cells');cells.style.gridTemplateRows=`repeat(${r},1fr)`;cells.style.gridTemplateColumns=`repeat(${c},1fr)`;
+  cells.replaceChildren(...Array.from({length:r*c},(_,i)=>{const b=document.createElement('button');
+    b.textContent=i+1;b.setAttribute('aria-label',`翻開第 ${i+1} 格`);b.style.background=`var(--${PAL[(i*7+q*3)%PAL.length]})`;
+    b.addEventListener('click',()=>{b.classList.add('off');count()});return b}));
+  const pic=$('pic');pic.onload=()=>{const ar=pic.naturalWidth/pic.naturalHeight||1.79;$('stage').style.setProperty('--ar',ar.toFixed(3))};
+  pic.src=it.url||it.src;
+  $('answer').classList.remove('show');$('answer').replaceChildren(document.createTextNode(it.answer||'（還沒寫答案）'));
+  const sm=document.createElement('small');sm.textContent='答案';$('answer').prepend(sm);
+  $('qno').textContent=`第 ${q+1} / ${list.length} 題`;
+  count();
+}
+function count(){const n=document.querySelectorAll('#cells button:not(.off)').length;$('left').textContent=n?`還有 ${n} 格`:'全部翻開了';
+  if(!n)$('answer').classList.add('show')}
+function flipOne(){const c=[...document.querySelectorAll('#cells button:not(.off)')];if(c.length){c[Math.floor(Math.random()*c.length)].classList.add('off');count()}}
+function flipAll(){document.querySelectorAll('#cells button').forEach(x=>x.classList.add('off'));count()}
+function go(d){q=(q+d+list.length)%list.length;build()}
+
+$('oneBtn').onclick=flipOne;$('allBtn').onclick=flipAll;
+$('ansBtn').onclick=()=>$('answer').classList.toggle('show');
+$('prevBtn').onclick=()=>go(-1);$('nextBtn').onclick=()=>go(1);
+$('gridSel').value=grid;$('gridSel').onchange=e=>{grid=e.target.value;ls.set('guess.grid',grid);build()};
+$('fsBtn').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
+document.addEventListener('keydown',e=>{
+  if($('lib').open||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;
+  if(e.key===' '){e.preventDefault();flipOne()}
+  else if(e.key==='Enter'&&e.target.tagName!=='BUTTON'){flipAll()}
+  else if(e.key==='ArrowRight'||e.key==='PageDown'){go(1)}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){go(-1)}
+  else if(e.key==='a'||e.key==='A'){$('answer').classList.toggle('show')}
+  else if(e.key==='f'||e.key==='F'){$('fsBtn').click()}
+});
+
+/* ---- library ---- */
+function toast(t){const el=$('toast');el.textContent=t;el.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('on'),2200)}
+function renderLib(){
+  const g=$('grid');const items=allItems();
+  if(order){const pos=new Map(order.map((id,i)=>[id,i]));items.sort((a,b)=>(pos.has(a.id)?pos.get(a.id):1e6)-(pos.has(b.id)?pos.get(b.id):1e6))}
+  g.replaceChildren(...items.map((it,i)=>{
+    const card=document.createElement('div');card.className='card'+(off.has(it.id)?' offq':'');
+    const th=document.createElement('div');th.className='th';
+    const im=new Image();im.src=it.url||it.src;im.alt=it.answer;im.loading='lazy';th.append(im);
+    const no=document.createElement('span');no.className='no';no.textContent=i+1;th.append(no);
+    if(it.mine){const m=document.createElement('span');m.className='mine';m.textContent='我的';th.append(m)}
+    const meta=document.createElement('div');meta.className='meta';
+    if(it.mine){const inp=document.createElement('input');inp.type='text';inp.value=it.answer;inp.setAttribute('aria-label','答案');
+      inp.addEventListener('change',async()=>{it.answer=inp.value.trim();await dbPut({id:it.id,answer:it.answer,blob:it.blob,t:it.t});rebuildList(list[q]&&list[q].id);build()});meta.append(inp)}
+    else{const b=document.createElement('b');b.textContent=it.answer;meta.append(b)}
+    const row=document.createElement('div');row.className='row';
+    const lab=document.createElement('label');const cb=document.createElement('input');cb.type='checkbox';cb.checked=!off.has(it.id);
+    cb.addEventListener('change',()=>{cb.checked?off.delete(it.id):off.add(it.id);ls.set('guess.off',[...off]);card.classList.toggle('offq',!cb.checked);const cur=list[q]&&list[q].id;rebuildList(cur);build()});
+    lab.append(cb,document.createTextNode('要玩'));row.append(lab);
+    const play=document.createElement('button');play.className='br';play.textContent='玩這題';
+    play.addEventListener('click',()=>{if(off.has(it.id)){off.delete(it.id);ls.set('guess.off',[...off])}rebuildList(it.id);build();$('lib').close()});row.append(play);
+    if(it.mine){const del=document.createElement('button');del.className='br';del.textContent='刪除';
+      del.addEventListener('click',async()=>{if(!confirm(`刪除「${it.answer}」這張圖？`))return;await dbDel(it.id);URL.revokeObjectURL(it.url);mine=mine.filter(m=>m.id!==it.id);rebuildList(list[q]&&list[q].id);build();renderLib()});row.append(del)}
+    meta.append(row);card.append(th,meta);return card}));
+}
+$('openLib').onclick=()=>{renderLib();$('lib').showModal()};
+$('closeLib').onclick=()=>$('lib').close();
+$('lib').addEventListener('click',e=>{if(e.target===$('lib'))$('lib').close()});
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{
+  if(b.dataset.mode==='mine'){if(!mine.length){toast('還沒有上傳圖片');return}off=new Set(BUILTIN.map(x=>x.id));mine.forEach(m=>off.delete(m.id))}
+  else off=new Set();
+  ls.set('guess.off',[...off]);rebuildList();q=0;build();renderLib();toast(b.dataset.mode==='mine'?`只玩我的 ${mine.length} 張`:`全部 ${allItems().length} 題`)});
+$('shuffleBtn').onclick=()=>{const ids=allItems().map(x=>x.id);for(let i=ids.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]]}
+  order=ids;ls.set('guess.order',order);rebuildList();q=0;build();renderLib();toast('已重新排序')};
+
+/* ---- upload ---- */
+function shrink(file){return new Promise(res=>{const u=URL.createObjectURL(file);const im=new Image();
+  im.onload=()=>{const s=Math.min(1,1600/Math.max(im.naturalWidth,im.naturalHeight));const cv=document.createElement('canvas');
+    cv.width=Math.round(im.naturalWidth*s);cv.height=Math.round(im.naturalHeight*s);cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
+    URL.revokeObjectURL(u);cv.toBlob(b=>res(b||file),'image/jpeg',.88)};
+  im.onerror=()=>{URL.revokeObjectURL(u);res(null)};im.src=u})}
+async function addFiles(files){
+  const imgs=[...files].filter(f=>f.type.startsWith('image/'));if(!imgs.length)return;
+  let n=0,saved=true;
+  for(const f of imgs){const blob=await shrink(f);if(!blob)continue;
+    const it={id:'m'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),answer:f.name.replace(/\.[^.]+$/,''),blob,t:Date.now(),mine:true};
+    it.url=URL.createObjectURL(blob);if(!(await dbPut({id:it.id,answer:it.answer,blob,t:it.t})))saved=false;mine.push(it);n++}
+  rebuildList(list[q]&&list[q].id);renderLib();
+  toast(saved?`已加入 ${n} 張，記得在下面改答案`:`已加入 ${n} 張（這個瀏覽器不能保存，關掉網頁就會不見）`);
+}
+$('file').addEventListener('change',e=>{addFiles(e.target.files);e.target.value=''});
+const drop=$('drop');
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over')}));
+drop.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
+document.addEventListener('dragover',e=>e.preventDefault());
+document.addEventListener('drop',e=>{e.preventDefault();if(!$('lib').open&&e.dataTransfer.files.length){$('lib').showModal();addFiles(e.dataTransfer.files)}});
+
+/* ---- start ---- */
+(async()=>{
+  rebuildList();build();
+  db=await idb();
+  const rows=await dbAll();
+  mine=rows.sort((a,b)=>a.t-b.t).map(r=>({id:r.id,answer:r.answer,blob:r.blob,t:r.t,mine:true,url:URL.createObjectURL(r.blob)}));
+  const startId=new URLSearchParams(location.search).get('q');
+  rebuildList();if(startId){const k=list.findIndex(x=>x.id==='b'+startId);if(k>=0)q=k}
+  build();
+})();
+</script>
+</body>
+</html>
