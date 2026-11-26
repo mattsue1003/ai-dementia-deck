@@ -218,6 +218,11 @@ dl.kit dd{margin:0}
 .advice .warn{margin-top:auto;font-size:.88rem;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
 .golink{display:inline-flex;align-items:center;gap:10px;font-weight:700;font-size:clamp(1.05rem,1.6vw,1.3rem);padding:12px 22px;background:var(--hi);color:var(--hi-fg);text-decoration:none;align-self:flex-start}
 .golink:hover{opacity:.88}
+.song{display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr);gap:clamp(20px,4vw,48px);align-items:center;flex:1;min-height:0}
+.song video{height:min(62vh,560px);aspect-ratio:1;max-width:100%;background:#000;border:1px solid var(--line);display:block}
+.song-side{display:flex;flex-direction:column;gap:18px;min-width:0}
+.lead-s{font-size:clamp(1.05rem,1.6vw,1.35rem);line-height:1.7;margin:0}
+@media (max-width:720px){.song{grid-template-columns:minmax(0,1fr)}.song video{height:auto;width:100%}}
 .ctrl{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;font-family:var(--mono);font-size:.875rem}
 .answer{font-size:clamp(1.2rem,2vw,1.6rem);font-weight:500;min-height:1.6em}
 .book{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:clamp(20px,4vw,52px);align-items:center}
@@ -382,7 +387,7 @@ dl.kit dd{margin:0}
     <h2>如何用 AI 媒介翻轉失智據點認知活動</h2>
     <p class="body">給失智社區服務據點的帶領者、照服員與志工。內容包含五個可直接帶的 AI 共創活動、一堂 90 分鐘課程的時間配置、倫理守則與成效紀錄方式。</p>
     <p class="body">版面致敬烏拉圭的 <a href="https://www.197historiasilustradas.com/" target="_blank" rel="noopener">197 Historias Ilustradas</a>：一人一張插畫，讓每段人生被記得。卡片上的圖案為示意圖形。</p>
-    <p class="body">[ 工具庫 ] 收錄 47 個現成的長輩活動網頁，分成 8 類，附畫面截圖，可搜尋，點卡片在新分頁開啟。</p>
+    <p class="body">[ 工具庫 ] 收錄 51 個現成的長輩活動網頁，分成 8 類，附畫面截圖，可搜尋，點卡片在新分頁開啟。</p>
     <p class="body">點任何一段文字或圖片，就會放大到全螢幕，方便大家看清楚重點；用滑鼠選取幾個字，再按 [ 放大 ]，可以只強調那一串字。按 Esc 或點任意處關閉。</p>
     <p class="body">五個案例後面都有「實作」頁：我們實際用 Gemini 與 Suno 做出成品，每一步都附上操作截圖。</p>
     <p class="mono muted">鍵盤 ← → 或空白鍵翻頁 · G 卡片牆 · L 目錄 · T 工具庫 · 手機可左右滑動</p>
@@ -622,6 +627,17 @@ ${demoHead('02','〈故鄉雲林的甘蔗香〉','成品・同一份歌詞，Gem
 <p class="mono muted">Styles：Taiwanese Hokkien oldies, slow ballad, acoustic guitar, accordion, warm male vocal, nostalgic, 1960s</p>
 <a class="linkbtn br" href="https://suno.com/song/2cfcb5d8-da40-4779-9775-191caf264c44" target="_blank" rel="noopener">在 Suno 聽這首歌 ↗</a>`);
 
+add('實作 02 Gemini 成品','demo',['yellow','dots','orange','note'],`
+${demoHead('02','〈故鄉的菜脯蛋〉','成品・Gemini 創作音樂・3 分 01 秒')}
+<div class="song">
+  <video src="media/caifu-dan.mp4" poster="media/caifu-dan.jpg" controls preload="none" playsinline></video>
+  <div class="song-side">
+    <p class="lead-s">同一份清水伯的歌詞，在 Gemini 按「＋ → 創作音樂」做出來的版本。Gemini 自己配了封面，下載時選「影片」就會帶著封面。</p>
+    <div class="chips"><span class="chip">長度：標準</span><span class="chip">人聲：人聲</span><span class="chip">台語老歌・慢板・吉他手風琴</span></div>
+    <p class="muted mono" style="font-size:.8rem">下載：滑到歌曲卡片 → 下載歌曲 → 影片（附封面）或 MP3 音軌</p>
+  </div>
+</div>`);
+
 add('案例 03 猜猜畫','case',['lilac','grid','cobalt','question'],caseSlide('03','AI 畫什麼？猜猜看',['lilac','grid','cobalt','question'],
  ['圖像生成','30 分鐘','分兩組','投影機'],
  ['事先生成一組懷舊物品圖：大同電鍋、縫紉機、黑白電視','投影時先遮住大半，每 10 秒露出一塊','兩組搶答，答對的人說一段和物品有關的回憶','反過來玩：長輩描述一樣東西，AI 畫，看像不像'],
@@ -828,6 +844,10 @@ const TOOLS=[
  T('taiwan-different','臺灣歷史時光機大家來找碴','mem','1948–2026 八段台灣歷史場景，找出 32 處不同。'),
  T('taiwan-festival-different','台灣節日大家來找碴','mem','八個台灣重要節日場景，找出 32 處不同。'),
  T('taiwan-taste-island','台灣好味島','mem','3D 台灣島，點縣市看名產、景點與聊天話題。'),
+ T('taipei-storyteller','台北說書人資料庫','mem','中華商場、西門町、淡水線小火車，先聽阿城伯說一集，再帶著問題陪長輩聊。'),
+ T('new-taipei-storyteller','新北說書人資料庫','mem','淡水渡船、九份金礦、平溪天燈、永和豆漿，新北在地懷舊話題。'),
+ T('taoyuan-storyteller','桃園說書人資料庫','mem','大溪老街、石門水庫活魚、龍岡米干、田中埤塘，桃園在地懷舊話題。'),
+ T('kaohsiung-storyteller','高雄說書人資料庫','mem','愛河夜色、旗津渡輪、加工區機車潮、岡山羊肉，高雄在地懷舊話題。'),
  T('oldsongdance','音樂律動全集 380 支','music','坐姿、站姿音樂律動影片，台語、國語金曲，可依年代篩選。'),
  T('pop-song-guess','台灣金曲猜歌','music','1950 到 2026 每個年代各 20 首，新增台語歌后。'),
  T('western-classical-old-song-guess','西洋金曲猜歌遊戲','music','20 首西洋老歌，聽前奏猜歌名。'),
@@ -876,8 +896,8 @@ function pad2(n){return String(n).padStart(2,'0')}
 
 const libStart=S.length;
 add('工具庫總覽','lib',['sky','grid','cobalt','dice'],`
-<div class="eyebrow"><b>11 工具庫</b><span>47 個現成網頁，分 9 類</span></div>
-<div class="cathead"><h2>不用從零開始：47 個工具，按用途找</h2></div>
+<div class="eyebrow"><b>11 工具庫</b><span>51 個現成網頁，分 9 類</span></div>
+<div class="cathead"><h2>不用從零開始：51 個工具，按用途找</h2></div>
 <div class="catgrid">
 ${CATS.map((c,k)=>`<button data-go="${libStart+1+k}" aria-label="前往 ${c.name}">${art(c.spec)}<div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span class="cap">${String.fromCharCode(65+k)}.　${TOOLS.filter(t=>t.c===c.k).length} 個工具</span><h3>${c.name}</h3><p>${c.dom}</p></div></button>`).join('')}
 </div>
@@ -980,7 +1000,7 @@ deck.addEventListener('touchend',e=>{if(tx===null)return;const dx=e.changedTouch
 /* ---------- zoom / spotlight ---------- */
 const zoomEl=document.getElementById('zoom'), zc=document.getElementById('zc'), selBtn=document.getElementById('selbtn');
 const ZSEL='img,.art,.quote,h1,h2,h3,.lead,.lyrics>div,.prompt,.tip,.compare>div,li,td,th,dt,dd,.chip,figcaption,.answer,p,.body';
-const NOZOOM='button,a,input,label,select,textarea,.cells,.thumbs,.catgrid,.libbar';
+const NOZOOM='button,a,input,label,select,textarea,video,.cells,.thumbs,.catgrid,.libbar';
 function openZoom(node){zc.innerHTML='';zc.appendChild(node);zoomEl.hidden=false;selBtn.hidden=true}
 function closeZoom(){zoomEl.hidden=true;zc.innerHTML=''}
 function zoomText(text,isSel){const d=document.createElement('div');d.className='ztext'+(isSel?' sel':'');
