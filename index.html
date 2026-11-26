@@ -387,7 +387,7 @@ dl.kit dd{margin:0}
     <h2>如何用 AI 媒介翻轉失智據點認知活動</h2>
     <p class="body">給失智社區服務據點的帶領者、照服員與志工。內容包含五個可直接帶的 AI 共創活動、一堂 90 分鐘課程的時間配置、倫理守則與成效紀錄方式。</p>
     <p class="body">版面致敬烏拉圭的 <a href="https://www.197historiasilustradas.com/" target="_blank" rel="noopener">197 Historias Ilustradas</a>：一人一張插畫，讓每段人生被記得。卡片上的圖案為示意圖形。</p>
-    <p class="body">[ 工具庫 ] 收錄 51 個現成的長輩活動網頁，分成 8 類，附畫面截圖，可搜尋，點卡片在新分頁開啟。</p>
+    <p class="body">[ 工具庫 ] 收錄 52 個現成的長輩活動網頁，分成 8 類，附畫面截圖，可搜尋，點卡片在新分頁開啟。</p>
     <p class="body">點任何一段文字或圖片，就會放大到全螢幕，方便大家看清楚重點；用滑鼠選取幾個字，再按 [ 放大 ]，可以只強調那一串字。按 Esc 或點任意處關閉。</p>
     <p class="body">五個案例後面都有「實作」頁：我們實際用 Gemini 與 Suno 做出成品，每一步都附上操作截圖。</p>
     <p class="mono muted">鍵盤 ← → 或空白鍵翻頁 · G 卡片牆 · L 目錄 · T 工具庫 · 手機可左右滑動</p>
@@ -847,6 +847,7 @@ const TOOLS=[
  T('taipei-storyteller','台北說書人資料庫','mem','中華商場、西門町、淡水線小火車，先聽阿城伯說一集，再帶著問題陪長輩聊。'),
  T('new-taipei-storyteller','新北說書人資料庫','mem','淡水渡船、九份金礦、平溪天燈、永和豆漿，新北在地懷舊話題。'),
  T('taoyuan-storyteller','桃園說書人資料庫','mem','大溪老街、石門水庫活魚、龍岡米干、田中埤塘，桃園在地懷舊話題。'),
+ T('taichung-storyteller','台中說書人資料庫','mem','台中火車站與綠川、湖心亭、自由路太陽餅、大甲媽祖遶境，台中在地懷舊話題。'),
  T('kaohsiung-storyteller','高雄說書人資料庫','mem','愛河夜色、旗津渡輪、加工區機車潮、岡山羊肉，高雄在地懷舊話題。'),
  T('oldsongdance','音樂律動全集 380 支','music','坐姿、站姿音樂律動影片，台語、國語金曲，可依年代篩選。'),
  T('pop-song-guess','台灣金曲猜歌','music','1950 到 2026 每個年代各 20 首，新增台語歌后。'),
@@ -896,8 +897,8 @@ function pad2(n){return String(n).padStart(2,'0')}
 
 const libStart=S.length;
 add('工具庫總覽','lib',['sky','grid','cobalt','dice'],`
-<div class="eyebrow"><b>11 工具庫</b><span>51 個現成網頁，分 9 類</span></div>
-<div class="cathead"><h2>不用從零開始：51 個工具，按用途找</h2></div>
+<div class="eyebrow"><b>11 工具庫</b><span>52 個現成網頁，分 9 類</span></div>
+<div class="cathead"><h2>不用從零開始：52 個工具，按用途找</h2></div>
 <div class="catgrid">
 ${CATS.map((c,k)=>`<button data-go="${libStart+1+k}" aria-label="前往 ${c.name}">${art(c.spec)}<div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span class="cap">${String.fromCharCode(65+k)}.　${TOOLS.filter(t=>t.c===c.k).length} 個工具</span><h3>${c.name}</h3><p>${c.dom}</p></div></button>`).join('')}
 </div>
